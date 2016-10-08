@@ -41,6 +41,7 @@ window.onload = function init() {
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) { alert("WebGL isn't available"); }
 
+	// load base colors
     colors.push(
 		vec4(1.0, 0.0, 0.0, 1.0),  // red
 		vec4(1.0, 1.0, 0.0, 1.0),  // yellow
@@ -50,44 +51,38 @@ window.onload = function init() {
 		vec4(1.0, 0.0, 1.0, 1.0)  // magenta
 	);
 
-
-    // LOAD GAME RENDERED OBJECTS
+	// world rotation
+	theta[0] = 0.0;
+	theta[1] = 0.0;
+	theta[2] = 0.0;
 
 
 
     // TODO: replace these calls which hard set the values with game logic which places objects here
-    // vertices is the actual list of vertices
-    vertices.push(
-		vec4(0, 0, cubeSize, 1),
-		vec4(0, cubeSize, cubeSize, 1),
-		vec4(cubeSize, cubeSize, cubeSize, 1),
-		vec4(cubeSize, 0.0, cubeSize, 1),
-		vec4(0, 0, 0, 1),
-		vec4(0, cubeSize, 0, 1),
-		vec4(cubeSize, cubeSize, 0, 1),
-		vec4(cubeSize, 0, 0, 1)
-	);
-
-    // indices defines the list of this lists of indeces which define each polygon
-	indices.push(
-		[1, 0, 3, 3, 2, 1],  // front face
-		[2, 3, 7, 6],  // right face
-		[3, 0, 4, 4, 7],  // bottom face
-		[6, 5, 1, 1, 2, 6],  // top face
-		[4, 5, 6, 6, 7, 4],  // back face
-		[5, 4, 0, 0, 1, 5]   // left face
-	);
-
-    // colorIndeces defines the color index for each polygon
-    colorIndeces.push(0, 1, 2, 3, 4, 5); // GAME.getColorInd();
+	addPolygon(
+		[
+			vec4(0, 0, cubeSize, 1),
+			vec4(0, cubeSize, cubeSize, 1),
+			vec4(cubeSize, cubeSize, cubeSize, 1),
+			vec4(cubeSize, 0.0, cubeSize, 1),
+			vec4(0, 0, 0, 1),
+			vec4(0, cubeSize, 0, 1),
+			vec4(cubeSize, cubeSize, 0, 1),
+			vec4(cubeSize, 0, 0, 1)
+		],
+		[
+			[1, 0, 3, 3, 2, 1],  // front face
+			[2, 3, 7, 6],  // right face
+			[3, 0, 4, 4, 7],  // bottom face
+			[6, 5, 1, 1, 2, 6],  // top face
+			[4, 5, 6, 6, 7, 4],  // back face
+			[5, 4, 0, 0, 1, 5]   // left face
+		],
+		[
+			0, 1, 2, 3, 4, 5
+		]);
 
 
-
-
-    // world rotation
-	theta[0] = 0.0;
-	theta[1] = 0.0;
-	theta[2] = 0.0;
 
     //
     //  Configure WebGL
@@ -111,6 +106,22 @@ window.onload = function init() {
 
     render();
 };
+
+/**
+ * Adds a new obejct made of polygons to be rendered.
+ *
+ * Given indeces are relative to the new vertices, but colors are relative to the global color list
+ */
+function addObject(newVertices, newIndeces, newColorIndeces) {
+	var vertexOffset = vertices.length;
+	vertices = vertices.concat(newVertices);
+	indices = indices.concat(newIndeces.map(function(indexList) {
+		return indexList.map(function(elem) {
+			return elem + vertexOffset;
+		});
+	}));
+	colorIndeces = colorIndeces.concat(newColorIndeces);
+}
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
