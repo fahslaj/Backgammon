@@ -47,8 +47,8 @@ window.onload = function init() {
 		vec4(1.0, 1.0, 0.0, 1.0),  // yellow
 		vec4(0.0, 1.0, 0.0, 1.0),  // green
 		vec4(0.0, 0.0, 1.0, 1.0),  // blue
-		vec4(0.0, 1.0, 1.0, 1.0),   // cyan
-		vec4(1.0, 0.0, 1.0, 1.0)  // magenta
+		vec4(0.0, 1.0, 1.0, 1.0),  // cyan
+		vec4(1.0, 0.0, 1.0, 1.0)   // magenta
 	);
 
 	// world rotation
@@ -72,8 +72,8 @@ window.onload = function init() {
 		],
 		[
 			[1, 0, 3, 3, 2, 1],  // front face
-			[2, 3, 7, 6],  // right face
-			[3, 0, 4, 4, 7],  // bottom face
+			[2, 3, 7, 6],  		 // right face
+			[3, 0, 4, 4, 7],  	 // bottom face
 			[6, 5, 1, 1, 2, 6],  // top face
 			[4, 5, 6, 6, 7, 4],  // back face
 			[5, 4, 0, 0, 1, 5]   // left face
