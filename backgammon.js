@@ -59,7 +59,7 @@ window.onload = function init() {
 
 
     // TODO: replace these calls which hard set the values with game logic which places objects here
-	addPolygon(
+	addObject(
 		[
 			vec4(0, 0, cubeSize, 1),
 			vec4(0, cubeSize, cubeSize, 1),
