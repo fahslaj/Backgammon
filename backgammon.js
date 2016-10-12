@@ -24,11 +24,13 @@ var colorIndices = [];
 
 var theta = [];
 
-var cubeSize = 10;
-var cubeSize2 = cubeSize / 2.0;
+var scale = 1;
+var cubeSize2 = scale / 2.0;
+
+var zoom = 0;
 
 var depthMin = 0.1;
-var depthMax = 10 * cubeSize;
+var depthMax = 10 * scale;
 
 var xAxis = 0;
 var yAxis = 1;
@@ -36,6 +38,9 @@ var zAxis = 2;
 var axis = 0;
 
 var aspect;
+
+const at = vec3(0.0, 0.0, 0.0);
+const up = vec3(0.0, 1.0, 0.0);
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -58,34 +63,9 @@ window.onload = function init() {
     theta[0] = 0.0;
     theta[1] = 0.0;
     theta[2] = 0.0;
+    // theta[0] += 50; theta[1] += 50; theta[2] += 50;
 
-
-
-    // TODO: replace these calls which hard set the values with game logic which places objects here
-    addObject(
-        [
-            vec4(0, 0, cubeSize, 1),
-            vec4(0, cubeSize, cubeSize, 1),
-            vec4(cubeSize, cubeSize, cubeSize, 1),
-            vec4(cubeSize, 0.0, cubeSize, 1),
-            vec4(0, 0, 0, 1),
-            vec4(0, cubeSize, 0, 1),
-            vec4(cubeSize, cubeSize, 0, 1),
-            vec4(cubeSize, 0, 0, 1)
-        ],
-        [
-            [1, 0, 3, 3, 2, 1],  // front face
-            [2, 3, 7, 6],  		 // right face
-            [3, 0, 4, 4, 7],  	 // bottom face
-            [6, 5, 1, 1, 2, 6],  // top face
-            [4, 5, 6, 6, 7, 4],  // back face
-            [5, 4, 0, 0, 1, 5]   // left face
-        ],
-        [
-            0, 1, 2, 3, 4, 5
-        ]);
-
-
+    initBoard();
 
     //
     //  Configure WebGL
@@ -140,7 +120,7 @@ function render() {
 
     var c = [];
     var s = [];
-    for (i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
         var a = radians(theta[i]);
         c[i] = Math.cos(a);
         s[i] = Math.sin(a);
@@ -161,24 +141,30 @@ function render() {
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0);
 
-    var tz1 = mat4(1.0, 0.0, 0.0, -cubeSize2,
-        0.0, 1.0, 0.0, -cubeSize2,
-        0.0, 0.0, 1.0, -cubeSize2,
+    var tz = mat4(1.0, 0.0, 0.0, zoom,
+        0.0, 1.0, 0.0, zoom,
+        0.0, 0.0, 1.0, zoom,
         0.0, 0.0, 0.0, 1.0);
 
-    var tz2 = mat4(1.0, 0.0, 0.0, cubeSize2,
-        0.0, 1.0, 0.0, cubeSize2,
-        0.0, 0.0, 1.0, cubeSize2,
-        0.0, 0.0, 0.0, 1.0);
+    var eye = vec3(scale, scale, scale);
 
-    var looking = lookAt(vec3(cubeSize2, cubeSize2, 4 * cubeSize), vec3(cubeSize2, cubeSize2, 0), vec3(0, 1, 0));
+    var looking = lookAt(eye, at, up);
     var rotation = mult(rz, mult(ry, rx));
-    var modelView = mult(looking, mult(tz2, mult(rotation, tz1)));
+    var modelView = mult(looking, mult(tz, rotation));
+    // modelView = mult(looking, tz);
     var projection = perspective(50, aspect, depthMin, depthMax);
 
     gl.uniformMatrix4fv(modelViewLoc, false, flatten(modelView));
     gl.uniformMatrix4fv(projectionLoc, false, flatten(projection));
 
+    drawWorld();
+
+    // TODO: draw points
+
+    requestAnimFrame(render);
+}
+
+function drawWorld() {
     var index = 0;
     while (colorIndices.length < indices.length) {
         console.log("not all polygons have colors! setting them to something");
@@ -190,6 +176,53 @@ function render() {
         gl.drawElements(gl.TRIANGLE_FAN, indices[i].length, gl.UNSIGNED_BYTE, index);
         index += indices[i].length;
     }
+}
 
-    requestAnimFrame(render);
+function updatePiecesPoints() {
+    GameState.board.triangles.forEach(function (element, index, array) {
+
+    })
+}
+
+function initBoard() {
+    addObject(
+        [
+            vec4(0, 0, scale / 5, 1),
+            vec4(0, scale / 5, scale / 5, 1),
+            vec4(scale / 5, scale / 5, scale / 5, 1),
+            vec4(scale / 5, 0.0, scale / 5, 1),
+            vec4(0, 0, 0, 1),
+            vec4(0, scale / 5, 0, 1),
+            vec4(scale / 5, scale / 5, 0, 1),
+            vec4(scale / 5, 0, 0, 1)
+        ],
+        [
+            [1, 0, 3, 3, 2, 1],  // front face
+            [2, 3, 7, 6],  		 // right face
+            [3, 0, 4, 4, 7],  	 // bottom face
+            [6, 5, 1, 1, 2, 6],  // top face
+            [4, 5, 6, 6, 7, 4],  // back face
+            [5, 4, 0, 0, 1, 5]   // left face
+        ],
+        [
+            0, 1, 2, 3, 4, 5
+        ]);
+
+    // addObject(
+    //     [
+    //         vec4(0, 0, 0, 1),
+    //         vec4(.5, .5, 0, 1),
+    //         vec4(0, .5, .2, 1),
+    //         // vec4(-.5, .5, .5, 1)
+    //     ],
+    //     [
+    //         [0, 1, 2],
+    //         // [0, 1, 3]
+    //     ],
+    //     [
+    //         0,
+    //         1
+    //     ]
+    // );
+
 }
