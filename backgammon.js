@@ -146,7 +146,8 @@ function render() {
         0.0, 0.0, 1.0, zoom,
         0.0, 0.0, 0.0, 1.0);
 
-    var eye = vec3(scale, scale, scale);
+    // rotate the world based on the turn
+    var eye = vec3(0, scale * 2/3, GameState.turn ? -scale : scale);
 
     var looking = lookAt(eye, at, up);
     var rotation = mult(rz, mult(ry, rx));
