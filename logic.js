@@ -127,8 +127,8 @@ function isValidMove(startTriangle, endTriangle) {
 		if (endTriangle - startTriangle == GameState.dice[2][0] &&
 			!GameState.dice[2][1]) {
 			return 2;
-		} 
-		if (endTriangle - startTriangle == GameState.dice[1][0] + 
+		}
+		if (endTriangle - startTriangle == GameState.dice[1][0] +
 			GameState.dice[2][0] && !GameState.dice[1][1] &&
 			!GameState.dice[2][1]) {
 			return 3;
@@ -166,7 +166,7 @@ function isValidBarMove(endTriangle) {
 	}
 	var die1 = GameState.dice[1][0];
 	var die2 = GameState.dice[2][0];
-	var triangle1; 
+	var triangle1;
 	var triangle2;
 	var triangle3;
 	if (GameState.turn) {
@@ -205,7 +205,7 @@ function contains(listy, element) {
 }
 
 /**
- * Move one piece from startTriangle to the endTriangle. Moves the 
+ * Move one piece from startTriangle to the endTriangle. Moves the
  * current player's piece only, and will not make an invalid move.
  * TODO: add accounting for doubles being 'doubled'
  */
@@ -260,6 +260,7 @@ function endTurn() {
 		rollDie(0);
 		rollDie(1);
 		GameState.turn = !GameState.turn;
+		spinboard();
 	}
 }
 

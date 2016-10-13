@@ -41,10 +41,13 @@ var aspect;
 const at = vec3(0.0, 0.0, 0.0);
 const up = vec3(0.0, 1.0, 0.0);
 
+const boardscale = scale * 1.5;
+const boardLength = boardscale * 2 / 3;
+const boardWidth = boardscale * 1 / 2;
+const boardHeight = boardscale *  1 / 6;
+const boardwallwidth = boardscale * 1 / 16;
 
-const boardLength = scale * 2 / 3;
-const boardWidth = scale * 1 / 2;
-const boardHeight = scale *  1 / 6;
+var boardOffset = -boardscale * 1 / 2;
 
 
 window.onload = function init() {
@@ -56,13 +59,12 @@ window.onload = function init() {
 
     // load base colors
     colors.push(
-        vec4(1.0, 0.0, 0.0, 1.0),  // red
-        vec4(1.0, 1.0, 0.0, 1.0),  // yellow
-        vec4(0.0, 1.0, 0.0, 1.0),  // green
-        vec4(0.0, 0.0, 1.0, 1.0),  // blue
-        vec4(0.0, 1.0, 1.0, 1.0),  // cyan
-        vec4(1.0, 0.0, 1.0, 1.0),  // magenta
-        vec4(210 / 255, 180 / 255, 140 / 255) // brown
+        rgb(210, 180, 140), // brown
+        rgb(210, 170, 116),
+        rgb(91, 81, 80), // charcoal
+        rgb(68, 61, 60), // charcoal
+        rgb(168, 77, 70),
+        rgb(26, 27, 28)
     );
 
     // world rotation
@@ -148,7 +150,7 @@ function render() {
         0.0, 0.0, 0.0, 1.0);
 
     // rotate the world based on the turn
-    var eye = vec3(0, scale * 2, GameState.turn ? -scale : scale);
+    var eye = vec3(0, scale * 2, scale);
 
     var looking = lookAt(eye, at, up);
     var rotation = mult(rz, mult(ry, rx));
@@ -186,45 +188,94 @@ function updatePiecesPoints() {
 }
 
 function initBoard() {
-    // addObject(
-    //     [
-    //         vec4(0, 0, scale / 5, 1),
-    //         vec4(0, scale / 5, scale / 5, 1),
-    //         vec4(scale / 5, scale / 5, scale / 5, 1),
-    //         vec4(scale / 5, 0.0, scale / 5, 1),
-    //         vec4(0, 0, 0, 1),
-    //         vec4(0, scale / 5, 0, 1),
-    //         vec4(scale / 5, scale / 5, 0, 1),
-    //         vec4(scale / 5, 0, 0, 1)
-    //     ],
-    //     [
-    //         [1, 0, 3, 3, 2, 1],  // front face
-    //         [2, 3, 7, 6],  		 // right face
-    //         [3, 0, 4, 4, 7],  	 // bottom face
-    //         [6, 5, 1, 1, 2, 6],  // top face
-    //         [4, 5, 6, 6, 7, 4],  // back face
-    //         [5, 4, 0, 0, 1, 5]   // left face
-    //     ],
-    //     [
-    //         0, 1, 2, 3, 4, 5
-    //     ]);
-
+    // board
+    var walltop = boardOffset + boardHeight / 2;
     addObject(
         [
-            vec4(-boardLength, 0, -boardWidth, 1),
-            vec4(boardLength, 0, -boardWidth, 1),
-            vec4(boardLength, 0, boardWidth, 1),
-            vec4(-boardLength, 0, boardWidth, 1),
-            // vec4(-.5, .5, .5, 1)
+            // base
+            vec4(-boardLength, boardOffset - boardHeight, -boardWidth, 1), // 0
+            vec4(boardLength, boardOffset - boardHeight, -boardWidth, 1),
+            vec4(boardLength, boardOffset - boardHeight, boardWidth, 1),
+            vec4(-boardLength, boardOffset - boardHeight, boardWidth, 1),
+
+            // board level
+            vec4(-boardLength, boardOffset, -boardWidth, 1), // 4
+            vec4(boardLength, boardOffset, -boardWidth, 1),
+            vec4(boardLength, boardOffset, boardWidth, 1),
+            vec4(-boardLength, boardOffset, boardWidth, 1),
+
+            // walls
+            vec4(-boardLength, walltop, -boardWidth, 1), // 8
+            vec4(boardLength, walltop, -boardWidth, 1),
+            vec4(boardLength, walltop, boardWidth, 1),
+            vec4(-boardLength, walltop, boardWidth, 1),
+
+            vec4(-boardLength + boardwallwidth, walltop, -boardWidth + boardwallwidth, 1), // 12
+            vec4(boardLength - boardwallwidth, walltop, -boardWidth + boardwallwidth, 1),
+            vec4(boardLength - boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
+            vec4(-boardLength + boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
+
+            vec4(-boardLength + boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1), // 16
+            vec4(boardLength - boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1),
+            vec4(boardLength - boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
+            vec4(-boardLength + boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
+
+            vec4(0 + boardwallwidth / 2, walltop, -boardWidth + boardwallwidth, 1), // 20
+            vec4(0 - boardwallwidth / 2, walltop, -boardWidth + boardwallwidth, 1),
+            vec4(0 + boardwallwidth / 2, walltop, boardWidth - boardwallwidth, 1),
+            vec4(0 - boardwallwidth / 2, walltop, boardWidth - boardwallwidth, 1),
+
+            vec4(0 + boardwallwidth / 2, boardOffset, -boardWidth + boardwallwidth, 1), // 24
+            vec4(0 - boardwallwidth / 2, boardOffset, -boardWidth + boardwallwidth, 1),
+            vec4(0 + boardwallwidth / 2, boardOffset, boardWidth - boardwallwidth, 1),
+            vec4(0 - boardwallwidth / 2, boardOffset, boardWidth - boardwallwidth, 1),
         ],
         [
             [0, 1, 2, 3],
-            // [0, 1, 3]
+            [4, 5, 6, 7],
+
+            [0, 8, 11, 3],
+            [0, 8, 9, 1],
+            [3, 11, 10, 2],
+            [2, 10, 9, 1],
+
+            [8, 12, 15, 11],
+            [8, 12, 13, 9],
+            [11, 15, 14, 10],
+            [10, 14, 13, 9],
+
+            [12, 16, 19, 15],
+            [12, 16, 17, 13],
+            [15, 19, 18, 14],
+            [14, 18, 17, 13],
+
+            [20, 21, 23, 22],
+            [20, 22, 26, 24]
         ],
-        [
-            6,
-            6
-        ]
+        [2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3]
     );
 
+}
+
+function rgb(r, g, b) {
+    return vec4(r / 255, g / 255, b / 255, 1);
+}
+
+function spinboard() {
+    var degreesRemaining = GameState.turn ? -180 : 180;
+    rotateRemaining(degreesRemaining);
+}
+
+// var degreesRemaining = 0;
+
+function rotateRemaining(degreesRemaining) {
+    if (degreesRemaining == 0) {
+        return;
+    } else if (degreesRemaining > 0) {
+        theta[1] += 1;
+        setTimeout(function() {return rotateRemaining(degreesRemaining - 1)}, 10);
+    } else {
+        theta[1] -= 1;
+        setTimeout(function() {return rotateRemaining(degreesRemaining + 1)}, 10);
+    }
 }
