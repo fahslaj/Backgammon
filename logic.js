@@ -120,15 +120,9 @@ function getValidBarMoves() {
  * Returns 3 if is a valid bar move using both dice.
  */
 function isValidBarMove(endTriangle) {
-	var hasPiece = false;
-	for (var piece : GameState.board.bar) {
-		if (piece == GameState.turn) {
-			hasPiece = true;
-		}
-	}
-	if (!hasPiece) {
+	if (GameState.board.bar.indexOf(GameState.turn) == -1) {
 		return false;
-	} 
+	}
 	var die1 = GameState.dice[1][0];
 	var die2 = GameState.dice[2][0];
 	var triangle1; 
