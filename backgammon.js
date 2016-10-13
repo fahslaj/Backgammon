@@ -25,7 +25,6 @@ var colorIndices = [];
 var theta = [];
 
 var scale = 1;
-var cubeSize2 = scale / 2.0;
 
 var zoom = 0;
 
@@ -42,6 +41,12 @@ var aspect;
 const at = vec3(0.0, 0.0, 0.0);
 const up = vec3(0.0, 1.0, 0.0);
 
+
+const boardLength = scale * 2 / 3;
+const boardWidth = scale * 1 / 2;
+const boardHeight = scale *  1 / 6;
+
+
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
 
@@ -56,7 +61,8 @@ window.onload = function init() {
         vec4(0.0, 1.0, 0.0, 1.0),  // green
         vec4(0.0, 0.0, 1.0, 1.0),  // blue
         vec4(0.0, 1.0, 1.0, 1.0),  // cyan
-        vec4(1.0, 0.0, 1.0, 1.0)   // magenta
+        vec4(1.0, 0.0, 1.0, 1.0),  // magenta
+        vec4(210 / 255, 180 / 255, 140 / 255) // brown
     );
 
     // world rotation
@@ -141,18 +147,12 @@ function render() {
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0);
 
-    var tz = mat4(1.0, 0.0, 0.0, zoom,
-        0.0, 1.0, 0.0, zoom,
-        0.0, 0.0, 1.0, zoom,
-        0.0, 0.0, 0.0, 1.0);
-
     // rotate the world based on the turn
-    var eye = vec3(0, scale * 2/3, GameState.turn ? -scale : scale);
+    var eye = vec3(0, scale * 2, GameState.turn ? -scale : scale);
 
     var looking = lookAt(eye, at, up);
     var rotation = mult(rz, mult(ry, rx));
-    var modelView = mult(looking, mult(tz, rotation));
-    // modelView = mult(looking, tz);
+    var modelView = mult(looking, rotation);
     var projection = perspective(50, aspect, depthMin, depthMax);
 
     gl.uniformMatrix4fv(modelViewLoc, false, flatten(modelView));
@@ -186,44 +186,45 @@ function updatePiecesPoints() {
 }
 
 function initBoard() {
-    addObject(
-        [
-            vec4(0, 0, scale / 5, 1),
-            vec4(0, scale / 5, scale / 5, 1),
-            vec4(scale / 5, scale / 5, scale / 5, 1),
-            vec4(scale / 5, 0.0, scale / 5, 1),
-            vec4(0, 0, 0, 1),
-            vec4(0, scale / 5, 0, 1),
-            vec4(scale / 5, scale / 5, 0, 1),
-            vec4(scale / 5, 0, 0, 1)
-        ],
-        [
-            [1, 0, 3, 3, 2, 1],  // front face
-            [2, 3, 7, 6],  		 // right face
-            [3, 0, 4, 4, 7],  	 // bottom face
-            [6, 5, 1, 1, 2, 6],  // top face
-            [4, 5, 6, 6, 7, 4],  // back face
-            [5, 4, 0, 0, 1, 5]   // left face
-        ],
-        [
-            0, 1, 2, 3, 4, 5
-        ]);
-
     // addObject(
     //     [
+    //         vec4(0, 0, scale / 5, 1),
+    //         vec4(0, scale / 5, scale / 5, 1),
+    //         vec4(scale / 5, scale / 5, scale / 5, 1),
+    //         vec4(scale / 5, 0.0, scale / 5, 1),
     //         vec4(0, 0, 0, 1),
-    //         vec4(.5, .5, 0, 1),
-    //         vec4(0, .5, .2, 1),
-    //         // vec4(-.5, .5, .5, 1)
+    //         vec4(0, scale / 5, 0, 1),
+    //         vec4(scale / 5, scale / 5, 0, 1),
+    //         vec4(scale / 5, 0, 0, 1)
     //     ],
     //     [
-    //         [0, 1, 2],
-    //         // [0, 1, 3]
+    //         [1, 0, 3, 3, 2, 1],  // front face
+    //         [2, 3, 7, 6],  		 // right face
+    //         [3, 0, 4, 4, 7],  	 // bottom face
+    //         [6, 5, 1, 1, 2, 6],  // top face
+    //         [4, 5, 6, 6, 7, 4],  // back face
+    //         [5, 4, 0, 0, 1, 5]   // left face
     //     ],
     //     [
-    //         0,
-    //         1
-    //     ]
-    // );
+    //         0, 1, 2, 3, 4, 5
+    //     ]);
+
+    addObject(
+        [
+            vec4(-boardLength, 0, -boardWidth, 1),
+            vec4(boardLength, 0, -boardWidth, 1),
+            vec4(boardLength, 0, boardWidth, 1),
+            vec4(-boardLength, 0, boardWidth, 1),
+            // vec4(-.5, .5, .5, 1)
+        ],
+        [
+            [0, 1, 2, 3],
+            // [0, 1, 3]
+        ],
+        [
+            6,
+            6
+        ]
+    );
 
 }
