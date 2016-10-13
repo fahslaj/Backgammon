@@ -220,15 +220,16 @@ function initBoard() {
             vec4(boardLength - boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
             vec4(-boardLength + boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
 
-            vec4(0 + boardwallwidth / 2, walltop, -boardWidth + boardwallwidth, 1), // 20
-            vec4(0 - boardwallwidth / 2, walltop, -boardWidth + boardwallwidth, 1),
-            vec4(0 + boardwallwidth / 2, walltop, boardWidth - boardwallwidth, 1),
-            vec4(0 - boardwallwidth / 2, walltop, boardWidth - boardwallwidth, 1),
+            // bar
+            vec4(0 + boardwallwidth, walltop, -boardWidth + boardwallwidth, 1), // 20
+            vec4(0 - boardwallwidth, walltop, -boardWidth + boardwallwidth, 1),
+            vec4(0 + boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
+            vec4(0 - boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
 
-            vec4(0 + boardwallwidth / 2, boardOffset, -boardWidth + boardwallwidth, 1), // 24
-            vec4(0 - boardwallwidth / 2, boardOffset, -boardWidth + boardwallwidth, 1),
-            vec4(0 + boardwallwidth / 2, boardOffset, boardWidth - boardwallwidth, 1),
-            vec4(0 - boardwallwidth / 2, boardOffset, boardWidth - boardwallwidth, 1),
+            vec4(0 + boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1), // 24
+            vec4(0 - boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1),
+            vec4(0 + boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
+            vec4(0 - boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
         ],
         [
             [0, 1, 2, 3],
