@@ -1,5 +1,6 @@
 /** @namespace gl.DEPTH_TEST */
 /** @namespace gl.ARRAY_BUFFER */
+/** @namespace gl.STATIC_DRAW */
 
 var canvas;
 var gl;
@@ -21,6 +22,8 @@ var colors = [];
 var indices = [];
 // colorIndices defines the color index for each polygon
 var colorIndices = [];
+var maxNumVertices = 10000;
+var worldIndicesOffset;
 
 var theta = [];
 
@@ -46,6 +49,19 @@ const boardLength = boardscale * 2 / 3;
 const boardWidth = boardscale / 2;
 const boardHeight = boardscale / 6;
 const boardwallwidth = boardscale / 16;
+
+var playableLength = boardLength - 2*boardwallwidth;
+var playableWidth = boardWidth - 2*boardwallwidth;
+var barWidth = 2*boardwallwidth;
+
+var triangleWidth = (playableLength - barWidth) / 12;
+
+var pieceNumPoints = 20;
+var triangleRef =   [
+                        []
+                    ];
+
+
 
 var boardOffset = -boardscale / 2;
 
@@ -73,8 +89,6 @@ window.onload = function init() {
     theta[2] = 0.0;
     // theta[0] += 50; theta[1] += 50; theta[2] += 50;
 
-    initBoard();
-
     //
     //  Configure WebGL
     //
@@ -92,7 +106,16 @@ window.onload = function init() {
     projectionLoc = gl.getUniformLocation(program, "projection");
 
     vBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, 16*maxNumVertices, gl.STATIC_DRAW);
+
     vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+
+    initBoard();
+    worldIndicesOffset = indices.length;
+
     iBuffer = gl.createBuffer();
 
     render();
@@ -111,14 +134,15 @@ function addObject(newVertices, newIndices, newColorIndices) {
             return elem + vertexOffset;
         });
     }));
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 8 * vertexOffset, flatten(vertices));
+
     colorIndices = colorIndices.concat(newColorIndices);
 }
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
@@ -181,7 +205,7 @@ function drawWorld() {
     }
 }
 
-function updatePiecesPoints() {
+function updatePlayable() {
     GameState.board.triangles.forEach(function (element, index, array) {
 
     })
@@ -255,6 +279,10 @@ function initBoard() {
         ],
         [2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3]
     );
+
+    GameState.board.triangles.forEach(function (element, index, array) {
+
+    })
 
 }
 
