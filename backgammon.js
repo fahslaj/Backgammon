@@ -43,11 +43,11 @@ const up = vec3(0.0, 1.0, 0.0);
 
 const boardscale = scale * 1.5;
 const boardLength = boardscale * 2 / 3;
-const boardWidth = boardscale * 1 / 2;
-const boardHeight = boardscale *  1 / 6;
-const boardwallwidth = boardscale * 1 / 16;
+const boardWidth = boardscale / 2;
+const boardHeight = boardscale / 6;
+const boardwallwidth = boardscale / 16;
 
-var boardOffset = -boardscale * 1 / 2;
+var boardOffset = -boardscale / 2;
 
 
 window.onload = function init() {
@@ -274,9 +274,9 @@ function rotateRemaining(degreesRemaining) {
         return;
     } else if (degreesRemaining > 0) {
         theta[1] += 1;
-        setTimeout(function() {return rotateRemaining(degreesRemaining - 1)}, 10);
+        setTimeout(function() {return rotateRemaining(degreesRemaining - 1)}, 3);
     } else {
         theta[1] -= 1;
-        setTimeout(function() {return rotateRemaining(degreesRemaining + 1)}, 10);
+        setTimeout(function() {return rotateRemaining(degreesRemaining + 1)}, 3);
     }
 }
