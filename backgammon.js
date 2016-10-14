@@ -423,7 +423,7 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
         return points;
 	};
 
-   	ind = [];
+   	var ind = [];
     ind[0] = [];
     for (var i = 0; i < this.numRimPoints; i++) {
         ind[0].push(i);
