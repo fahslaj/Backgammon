@@ -339,7 +339,7 @@ function updateClickAreas() {
     /**
      *  I couldn't get my 3d to 2d point conversion working because the scaling isn't from -1 to 1 and various other issues
      *
-     *   :(
+     *   :'(
      *
      */
 
@@ -643,7 +643,6 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
     	}
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-        console.log(bufferOffset, points.length);
         gl.bufferSubData(gl.ARRAY_BUFFER, 16 * bufferOffset, flatten(points));
         return points;
 	};
