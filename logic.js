@@ -15,7 +15,7 @@ var GameState = {
 
 // tracking for the initialization of the game
 var firstPlayerPicked = false;
-var firstTurnRollDone = false;
+var rollDone = false;
 
 // from the perspective of player 0
 var pieceMappy = {
@@ -43,8 +43,8 @@ for (var i = 0; i < 24; i++) {
  * this function must be called again.
  */
 function rollForFirstTurn() {
-	rollDie(0);
 	rollDie(1);
+	rollDie(2);
 	if (GameState.dice[1][0] > GameState.dice[2][0]) {
 		GameState.turn = 0;
 		firstPlayerPicked = true;
@@ -54,18 +54,23 @@ function rollForFirstTurn() {
 	}
 }
 
+function rollDice() {
+	rollDone = true;
+	rollDie(1);
+	rollDie(2);
+}
+
 /**
  * Roll the die at the given diePosition and set its 'used' value to false.
  * ***Note: the two dice are at positions 1 and 2
  */
 function rollDie(diePosition) {
-	firstTurnRollDone = true;
 	GameState.dice[diePosition][0] = Math.floor(Math.random()*6) + 1;
 	GameState.dice[diePosition][1] = 0;
 }
 
 function isGameInitialized() {
-	return firstPlayerPicked && firstTurnRollDone;
+	return firstPlayerPicked && rollDone;
 }
 
 /**
@@ -73,8 +78,8 @@ function isGameInitialized() {
  */
 function getValidMoves() {
 	var moves = [];
-	for (var startTriangle = -1; startTriangle < 24; startTriangle++) {
-		for (var endTriangle = -1; endTriangle < 24; endTriangle++) {
+	for (var startTriangle = 0; startTriangle < 25; startTriangle++) {
+		for (var endTriangle = 0; endTriangle < 25; endTriangle++) {
 			if (isValidMove(startTriangle, endTriangle)) {
 				moves.push([startTriangle, endTriangle]);
 			}
@@ -96,7 +101,7 @@ function isValidMove(startTriangle, endTriangle) {
 	}
 	var validBarMoves = getValidBarMoves();
 	if (validBarMoves.length != 0) {
-		if (startTriangle != -1) {
+		if (startTriangle != 24) {
 			return false;
 		}
 		return isValidBarMove(endTriangle);
@@ -145,7 +150,7 @@ function getValidBarMoves() {
 	var moves = [];
 	for (var endTriangle = 0; endTriangle < 24; endTriangle++) {
 		if (isValidBarMove(endTriangle)) {
-			moves.push([-1, endTriangle]);
+			moves.push([24, endTriangle]);
 		}
 	}
 	return moves;
@@ -229,7 +234,7 @@ function makeMove(startTriangle, endTriangle) {
 	} else {
 		pieceToMove = GameState.board.triangles[startTriangle].pop();
 	}
-	if (GameState.board.triangles[endTriangle].indexOf(!GameState.turn) != -1) {
+	if (GameState.board.triangles[endTriangle].indexOf(+!GameState.turn) != -1) {
 		// must only be 1 piece in the list, or isValidMove fails
 		hitPiece = GameState.board.triangles[endTriangle].pop();
 		GameState.board.bar.push(hitPiece);
@@ -257,10 +262,8 @@ function endTurn() {
 		};
 	}
 	if (!checkWin()) {
-		rollDie(0);
-		rollDie(1);
-		GameState.turn = !GameState.turn;
-		spinboard();
+		rollDone = false;
+		GameState.turn = +!GameState.turn;
 	}
 }
 
@@ -269,6 +272,9 @@ function endTurn() {
  */
 function checkWin() {
 	var foundPlayerPiece = false;
+	if (GameState.turn == -1) {
+		return false;
+	}
 	for (var i = 0; i < GameState.board.triangles.length; i++) {
 		if (GameState.board.triangles[i].indexOf(GameState.turn) != -1) {
 			foundPlayerPiece = true;
@@ -277,25 +283,26 @@ function checkWin() {
 	}
 	var foundOppPiece = false;
 	for (var i = 0; i < GameState.board.triangles.length; i++) {
-		if (GameState.board.triangles[i].indexOf(!GameState.turn) != -1) {
+		if (GameState.board.triangles[i].indexOf(+!GameState.turn) != -1) {
 			foundOppPiece = true;
 			break;
 		}
 	}
-	if (GameState.bar.indexOf(GameState.turn) != -1) {
+	if (GameState.board.bar.indexOf(GameState.turn) != -1) {
 		foundPlayerPiece = true;
 	}
-	if (GameState.bar.indexOf(!GameState.turn) != -1) {
+	if (GameState.board.bar.indexOf(+!GameState.turn) != -1) {
 		foundOppPiece = true;
 	}
-	if (foundPlayerPiece && foundOppPiece) {
+	if (!foundPlayerPiece && !foundOppPiece) {
 		throw 'Invalid game state: Draw';
+	} else if (foundPlayerPiece && foundOppPiece) {
+		return false;
 	} else if (foundPlayerPiece) {
 		GameState.winner = GameState.turn;
 		return true;
 	} else if (foundOppPiece) {
-		GameState.winner = !GameState.turn;
+		GameState.winner = +!GameState.turn;
 		return true;
 	}
-	return false;
 }

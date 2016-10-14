@@ -61,7 +61,9 @@ var pieceRadius = triangleWidth / 2;
 var pieceNumPoints = 20;
 var triangleRef =   [];
 
-var pieces = [];
+var pieces = []; // TODO: remove for triangle piece reference below
+var piecesByTriangle = [];
+
 var pieceOffset;
 var boardOffset = -boardscale / 2;
 
@@ -102,6 +104,9 @@ var clipAreas2d = [
 var modelView;
 var projection;
 
+var selectedLocation = -1;
+var moves = [];
+
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
 
@@ -130,16 +135,7 @@ window.onload = function init() {
     // theta[0] += 50; theta[1] += 50; theta[2] += 50;
 
     canvas.addEventListener("mousedown", function (event) {
-        var point = getCanvasPoint(event);
-        var x;
-        for (var i = 0; i < clipAreas2d.length; i++) {
-            x = clipAreas2d[i];
-            if ( x[0][0] > point[0] && x[1][0] < point[0] && x[0][1] > point[1] && x[1][1] < point[1] ||
-                    x[0][0] < point[0] && x[1][0] > point[0] && x[0][1] < point[1] && x[1][1] > point[1] ) {
-                console.log(i);
-
-            }
-        }
+    	handleMouseDown(event);
     });
 
 
@@ -175,6 +171,92 @@ window.onload = function init() {
 
     render();
 };
+
+function handleMouseDown(event) {
+	var point = getCanvasPoint(event);
+    var x;
+    var clickedOn = -1;
+    for (var i = 0; i < clipAreas2d.length; i++) {
+        x = clipAreas2d[i];
+        if ( x[0][0] > point[0] && x[1][0] < point[0] && x[0][1] > point[1] && x[1][1] < point[1] ||
+                x[0][0] < point[0] && x[1][0] > point[0] && x[0][1] < point[1] && x[1][1] > point[1] ) {
+       		clickedOn = i;
+       		console.log(clickedOn);
+           	break;
+        }
+    }
+    if (clickedOn == -1) {
+    	return;
+    }
+    if (selectedLocation == -1) {
+    	if (isGameInitialized()) {
+        	selectedLocation = clickedOn;
+        	console.log("Selecting: " + selectedLocation);
+        	resetStartTrianglesExcept(selectedLocation);
+        	highlightEndTrianglesFor(selectedLocation);
+    	}
+    } else {
+    	if (isValidMove(selectedLocation, clickedOn)) {
+    		makeMove(selectedLocation, clickedOn);
+    		console.log("Made move: " + selectedLocation + " " + clickedOn);
+    		selectedLocation = -1;
+    		// updatePieces()
+    	} else {
+    		selectedLocation = -1;
+    		console.log("Reset selection");
+    	}
+    	resetStartTrianglesExcept(-1);
+    	resetEndTriangles();
+    }
+}
+
+function uiEndTurn() {
+	try {
+		endTurn();
+		console.log("Starting turn for player: "+GameState.turn);
+		spinboard();
+	} catch (e) {
+		console.log("Couldn't end turn: Do you have moves left? "+e);
+	}
+}
+
+function rollDiceAndSetMoves() {
+	if (!firstPlayerPicked) {
+		rollForFirstTurn();
+		console.log("Rolled for first turn: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
+		if (firstPlayerPicked) {
+			console.log("Player "+GameState.turn+" goes first.");
+		}
+		if (firstPlayerPicked) {
+			if (GameState.turn == 1) {
+				spinboard();
+			}
+		}
+	} else if (!rollDone) {
+		rollDice();
+		moves = getValidMoves();
+		highlightStartTriangles(moves);
+		console.log("Rolled dice: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
+	} else {
+		console.log("Dice already rolled this turn.");
+	}
+}
+
+function highlightStartTriangles() {
+	// console.log("Hightlighting start triangles");
+}
+
+function resetStartTrianglesExcept(index) {
+	// console.log("Resetting start triangles");
+}
+
+function highlightEndTrianglesFor(index) {
+	// console.log("Highlighting end triangles for "+index);
+}
+
+function resetEndTriangles() {
+	// console.log("Resetting end triangles");
+}
 
 /**
  * Adds a new object made of polygons to be rendered.
@@ -486,11 +568,23 @@ function initBoard() {
 
 function initPieces() {
 	pieceOffset = worldIndexOffset;
+	for (var i = 0; i < 24; i++) {
+		piecesByTriangle[i] = [];
+	}
+	
 	for (var i = 0; i < 5; i++) {
-		pieces.push(new Piece(0, i, pieceOffset));
+		piecesByTriangle[0].push(new Piece(0, i, pieceOffset));
 		pieceOffset += 20;
 	}
 }
+
+// function initPieces() {
+// 	pieceOffset = worldIndexOffset;
+// 	for (var i = 0; i < 5; i++) {
+// 		pieces.push(new Piece(0, i, pieceOffset));
+// 		pieceOffset += 20;
+// 	}
+// }
 
 function rgb(r, g, b) {
     return vec4(r / 255, g / 255, b / 255, 1);
