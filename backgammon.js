@@ -111,7 +111,7 @@ window.onload = function init() {
     gl.bufferData(gl.ARRAY_BUFFER, 16*maxNumVertices, gl.STATIC_DRAW);
 
     vPosition = gl.getAttribLocation(program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
     initBoard();
@@ -137,16 +137,14 @@ function addObject(newVertices, newIndices, newColorIndices) {
     }));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 8 * vertexOffset, flatten(vertices));
+    console.log(vertexOffset);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 16 * vertexOffset, flatten(newVertices));
 
     colorIndices = colorIndices.concat(newColorIndices);
 }
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array([].concat.apply([], indices)), gl.STATIC_DRAW);
@@ -174,7 +172,6 @@ function render() {
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0);
 
-    // rotate the world based on the turn
     var eye = vec3(0, scale * 2, scale);
 
     var looking = lookAt(eye, at, up);
