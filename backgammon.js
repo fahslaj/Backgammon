@@ -31,6 +31,7 @@ var scale = 1;
 
 var zoom = 0;
 
+var flatset = .005;
 var depthMin = 0.1;
 var depthMax = 10 * scale;
 
@@ -46,26 +47,21 @@ const up = vec3(0.0, 1.0, 0.0);
 
 const boardscale = scale * 1.5;
 const boardLength = boardscale * 2 / 3;
-const boardWidth = boardscale / 2;
+const boardWidth = boardscale / 2 + .1;
 const boardHeight = boardscale / 6;
 const boardwallwidth = boardscale / 16;
 
-var playableLength = boardLength - 2*boardwallwidth;
-var playableWidth = boardWidth - 2*boardwallwidth;
+var playableLength = boardLength - boardwallwidth;
+var playableWidth = boardWidth - boardwallwidth;
 var barWidth = 2*boardwallwidth;
 
-var triangleWidth = (playableLength - barWidth) / 12;
+var triangleWidth = (playableLength - barWidth / 2) / 6;
 var pieceRadius = triangleWidth / 2;
 
 var pieceNumPoints = 20;
-var triangleRef =   [
-                        []
-                    ];
-
-
+var triangleRef =   [];
 
 var boardOffset = -boardscale / 2;
-
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -81,7 +77,9 @@ window.onload = function init() {
         rgb(91, 81, 80), // charcoal
         rgb(68, 61, 60), // charcoal
         rgb(168, 77, 70),
-        rgb(26, 27, 28)
+        rgb(26, 27, 28),
+        rgb(179, 0, 0),
+        rgb(255, 255, 204)
     );
 
     // world rotation
@@ -277,13 +275,97 @@ function initBoard() {
             [20, 21, 23, 22],
             [20, 22, 26, 24]
         ],
-        [2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 3, 3]
+        [2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 3]
     );
 
-    GameState.board.triangles.forEach(function (element, index, array) {
+    var mapping = [];
+    for (var i = 0; i < 18; i+=3) {
+    	mapping.push([i, i + 1, i + 2]);
+    }
+    var colors = [6, 7, 6, 7, 6, 7];
 
-    })
+    // upper right quadrant
+    points = [];
+    for (var i = 0; i < 6; i++) {
+    	var refPoint = vec4(playableLength - i * triangleWidth, 
+    						boardOffset + flatset, 
+    						-playableWidth,
+    						1);
+    	triangleRef.push([refPoint, 1]);
+    	points.push(refPoint,
+    				vec4(playableLength - (i + 1) * triangleWidth + triangleWidth / 2,
+    						boardOffset + flatset,
+    						-playableWidth + 5 * triangleWidth,
+    						1),
+    				vec4(playableLength - (i + 1) * triangleWidth,
+    						boardOffset + flatset,
+    						-playableWidth,
+    						1));
+    }
+    addObject(points, mapping, colors);
 
+    // upper left quadrant
+    var points = [];
+    for (var i = 0; i < 6; i++) {
+    	var refPoint = vec4(-playableLength + i * triangleWidth, 
+    						boardOffset + flatset, 
+    						-playableWidth, 
+    						1);
+    	triangleRef.push([refPoint, 1]);
+    	points.push(refPoint,
+    				vec4(-playableLength + (i + 1) * triangleWidth - triangleWidth / 2,
+    						boardOffset + flatset,
+    						-playableWidth + 5 * triangleWidth, 
+    						1),
+    				vec4(-playableLength + (i + 1) * triangleWidth,
+    						boardOffset + flatset,
+    						-playableWidth, 
+    						1));
+    }
+    colors.reverse();
+    addObject(points, mapping, colors);
+
+    // lower left quadrant
+    var points = [];
+    for (var i = 0; i < 6; i++) {
+    	var refPoint = vec4(-playableLength + i * triangleWidth, 
+    						boardOffset + flatset, 
+    						playableWidth, 
+    						1);
+    	triangleRef.push([refPoint, -1]);
+    	points.push(refPoint,
+    				vec4(-playableLength + (i + 1) * triangleWidth - triangleWidth / 2,
+    						boardOffset + flatset,
+    						playableWidth - 5 * triangleWidth, 
+    						1),
+    				vec4(-playableLength + (i + 1) * triangleWidth,
+    						boardOffset + flatset,
+    						playableWidth, 
+    						1));
+    }
+    colors.reverse();
+    addObject(points, mapping, colors);
+
+    // lower right quadrant
+    points = [];
+    for (var i = 0; i < 6; i++) {
+    	var refPoint = vec4(playableLength - i * triangleWidth, 
+    						boardOffset + flatset, 
+    						playableWidth,
+    						1);
+    	triangleRef.push([refPoint, -1]);
+    	points.push(refPoint,
+    				vec4(playableLength - (i + 1) * triangleWidth + triangleWidth / 2,
+    						boardOffset + flatset,
+    						playableWidth - 5 * triangleWidth,
+    						1),
+    				vec4(playableLength - (i + 1) * triangleWidth,
+    						boardOffset + flatset,
+    						playableWidth,
+    						1));
+    }
+    colors.reverse();
+    addObject(points, mapping, colors);
 }
 
 function rgb(r, g, b) {
