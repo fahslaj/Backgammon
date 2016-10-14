@@ -55,6 +55,7 @@ var playableWidth = boardWidth - 2*boardwallwidth;
 var barWidth = 2*boardwallwidth;
 
 var triangleWidth = (playableLength - barWidth) / 12;
+var pieceRadius = triangleWidth / 2;
 
 var pieceNumPoints = 20;
 var triangleRef =   [
