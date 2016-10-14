@@ -315,6 +315,7 @@ function initBoard() {
 
     // lower left quadrant
     points = [];
+    colors = colors.reverse();
     for (var i = 0; i < 6; i++) {
     	var refPoint = vec4(-playableLength + i * triangleWidth, 
     						boardOffset + flatset, 
