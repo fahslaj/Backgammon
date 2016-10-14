@@ -22,7 +22,7 @@ var colors = [];
 var indices = [];
 // colorIndices defines the color index for each polygon
 var colorIndices = [];
-var maxNumVertices = 10000;
+var maxNumVertices = 100000;
 var worldIndicesOffset;
 
 var theta = [];
@@ -114,6 +114,7 @@ window.onload = function init() {
 
     initBoard();
     worldIndicesOffset = indices.length;
+    initPieces();
 
     iBuffer = gl.createBuffer();
 
@@ -285,7 +286,7 @@ function initBoard() {
     var colors = [6, 7, 6, 7, 6, 7];
 
     // upper right quadrant
-    points = [];
+    var points = [];
     for (var i = 0; i < 6; i++) {
     	var refPoint = vec4(playableLength - i * triangleWidth, 
     						boardOffset + flatset, 
@@ -305,7 +306,7 @@ function initBoard() {
     addObject(points, mapping, colors);
 
     // upper left quadrant
-    var points = [];
+    points = [];
     for (var i = 0; i < 6; i++) {
     	var refPoint = vec4(-playableLength + i * triangleWidth, 
     						boardOffset + flatset, 
@@ -326,7 +327,7 @@ function initBoard() {
     addObject(points, mapping, colors);
 
     // lower left quadrant
-    var points = [];
+    points = [];
     for (var i = 0; i < 6; i++) {
     	var refPoint = vec4(-playableLength + i * triangleWidth, 
     						boardOffset + flatset, 
@@ -368,6 +369,10 @@ function initBoard() {
     addObject(points, mapping, colors);
 }
 
+function initPieces() {
+	// var piece = new Piece(0, triangleRef[0], worldIndicesOffset);
+}
+
 function rgb(r, g, b) {
     return vec4(r / 255, g / 255, b / 255, 1);
 }
@@ -389,4 +394,61 @@ function rotateRemaining(degreesRemaining) {
         theta[1] -= 1;
         setTimeout(function() {return rotateRemaining(degreesRemaining + 1)}, 3);
     }
+}
+
+function Piece(initialTriangle, trianglePos, bufferOffset) {
+	this.bufferOffset = bufferOffset;
+	this.triangle = initialTriangle;
+	this.trianglePos = trianglePos;
+
+	this.center = [ triangleRef[this.triangle][0] + triangleWidth / 2,
+		            triangleRef[this.triangle][1] + triangleWidth / 2 + triangleWidth * this.trianglePos ];
+	this.numRimPoints = pieceNumPoints / 2;
+
+	this.updatePoints = function(dx, dy) {
+        this.center[0] += dx;
+        this.center[1] += dy;
+
+	    var points = [];
+
+	    var theta = radians(360) / this.numRimPoints;
+	    var currAngle = 0;
+	    for (var i = 0; i < this.numRimPoints; i++) {
+	        points.push(vec4(   pieceRadius * Math.cos(currAngle) + this.center[0],
+                                boardOffset / 2,
+	                            pieceRadius * Math.sin(currAngle) + this.center[1]));
+	        currAngle += theta;
+    	}
+
+    	currAngle = 0;
+        for (i = 0; i < this.numRimPoints; i++) {
+	        points.push(vec4(   pieceRadius * Math.cos(currAngle) + this.center[0],
+                                boardOffset,
+	                            pieceRadius * Math.sin(currAngle) + this.center[1]));
+	        currAngle += theta;
+    	}
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 16 * bufferOffset, flatten(points));
+	};
+
+   	ind = [];
+    ind[0] = [];
+    for (var i = 0; i < this.numRimPoints; i++) {
+        ind[0].push(i);
+    }
+   	ind[1] = [];
+    for (i = 0; i < this.numRimPoints; i++) {
+        ind[1].push(i + this.numRimPoints);
+    }
+    for (i = 0; i < this.numRimPoints; i++) {
+        ind.push([  i,
+            (i + 1) % this.numRimPoints,
+            i + this.numRimPoints,
+            (i + 1) % this.numRimPoints + this.numRimPoints])
+    }
+
+    indices = concatAndOffset(indices, ind, this.bufferOffset);
+
+    this.updatePoints(0, 0);
 }
