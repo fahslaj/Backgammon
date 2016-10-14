@@ -63,6 +63,43 @@ var triangleRef =   [];
 
 var boardOffset = -boardscale / 2;
 
+var clipAreas2d = [
+    [vec2(.6, .2225), vec2(.5125, -0.175)],
+    [vec2(0.5125, 0.2225), vec2(0.4225, -0.1825)],
+    [vec2(.4225, 0.2225), vec2(0.365, -0.185)],
+    [vec2(0.3325, 0.2225), vec2(0.2675, -0.1875)],
+    [vec2(0.2425, 0.2225), vec2(0.167, -0.1825)],
+    [vec2(0.155, 0.2225), vec2(0.0725, -0.175)],
+
+    [vec2(-0.0625, 0.2225), vec2(-0.1575, -0.18)],
+    [vec2(-0.1525, 0.2225), vec2(-0.2625, -0.185)],
+    [vec2(-0.2375, 0.225), vec2(-0.3625, -0.185)],
+    [vec2(-0.3275, 0.2225), vec2(-0.4525, -0.18)],
+    [vec2(-0.4175, 0.225), vec2(-0.5525, -0.18)],
+    [vec2(-0.5575, 0.2225), vec2(-0.6575, -0.175)],
+
+    [vec2(-0.590, -0.3125), vec2(-0.755, -0.8375)],
+    [vec2(-0.475, -0.3025), vec2(-0.645, -0.8375)],
+    [vec2(-0.3775, -0.3125), vec2(-0.5275, -0.8425)],
+    [vec2(-0.275, -0.315), vec2(-0.4175, -0.8375)],
+    [vec2(-0.170, -0.314), vec2(-0.305, -0.84)],
+    [vec2(-0.0725, -0.3175), vec2(-0.19, -0.835)],
+
+    [vec2(0.17, -0.3075), vec2(0.0825, -0.835)],
+    [vec2(0.2775, -0.3125), vec2(0.195, -0.8375)],
+    [vec2(0.375, -0.31), vec2(0.305, -0.8375)],
+    [vec2(0.48, -0.305), vec2(0.4175, -0.8325)],
+    [vec2(0.5875, -0.3075), vec2(0.5325, -0.8375)],
+    [vec2(0.6425, -0.8275), vec2(0.6425, -0.8275)],
+
+    // BAR
+    [vec2(0.06, 0.2675), vec2(-0.08, -0.835)]
+];
+// var clipAreas3d = [];
+
+var modelView;
+var projection;
+
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
 
@@ -79,7 +116,9 @@ window.onload = function init() {
         rgb(50, 50, 152), // dark blue
         rgb(25, 25, 75), // blue-black
         rgb(179, 0, 0), // dark red
-        rgb(255, 255, 204) // off-white
+        rgb(255, 255, 204), // off-white
+        vec4(0, 0, 0, 25 / 255), // charcoal w/ alpha
+        vec4(0, 0, 0, 0) // clear
     );
 
     // world rotation
@@ -87,6 +126,21 @@ window.onload = function init() {
     theta[1] = 0.0;
     theta[2] = 0.0;
     // theta[0] += 50; theta[1] += 50; theta[2] += 50;
+
+    canvas.addEventListener("mousedown", function (event) {
+        var point = getCanvasPoint(event);
+        var x;
+        for (var i = 0; i < clipAreas2d.length; i++) {
+            x = clipAreas2d[i];
+            if ( x[0][0] > point[0] && x[1][0] < point[0] && x[0][1] > point[1] && x[1][1] < point[1] ||
+                    x[0][0] < point[0] && x[1][0] > point[0] && x[0][1] < point[1] && x[1][1] > point[1] ) {
+                console.log(i);
+
+
+            }
+        }
+    });
+
 
     //
     //  Configure WebGL
@@ -177,8 +231,8 @@ function render() {
 
     var looking = lookAt(eye, at, up);
     var rotation = mult(rz, mult(ry, rx));
-    var modelView = mult(looking, rotation);
-    var projection = perspective(50, aspect, depthMin, depthMax);
+    modelView = mult(looking, rotation);
+    projection = perspective(50, aspect, depthMin, depthMax);
 
     gl.uniformMatrix4fv(modelViewLoc, false, flatten(modelView));
     gl.uniformMatrix4fv(projectionLoc, false, flatten(projection));
@@ -196,6 +250,81 @@ function render() {
     }
 
     requestAnimFrame(render);
+}
+
+function updateClickAreas() {
+    /**
+     *  I couldn't get my 3d to 2d point conversion working because the scaling isn't from -1 to 1 and various other issues
+     *
+     *   :(
+     *
+     */
+
+    var temp;
+    for (var i = 0; i < 12; i++) {
+        temp = clipAreas2d[i];
+        clipAreas2d[i] = clipAreas2d[12 + i];
+        clipAreas2d[12 + i] = temp;
+    }
+
+    // var viewProj = mult(projection, modelView);
+    // compute 3d triangle areas
+    // for (var i = 0; i < triangleRef.length; i++) {
+    //     clipAreas3d[i] = [];
+    //     clipAreas3d[i].push(triangleRef[i][0]);
+    //     var point2 = vec4(  triangleRef[i][0][0] - triangleWidth * triangleRef[i][1],
+    //                         triangleRef[i][0][1],
+    //                         triangleRef[i][0][2] + triangleWidth * 5 * triangleRef[i][1],
+    //                         triangleRef[i][0][3] );
+    //     clipAreas3d[i].push(point2);
+    // }
+    //
+    // // TODO: compute special areas
+    //
+    //
+    // // go through and compute clicks
+    // for (i = 0; i < clipAreas3d.length; i++) {
+    //     var point2d_1 = getCanvasPosition(clipAreas3d[i][0], viewProj);
+    //     var point2d_2 = getCanvasPosition(clipAreas3d[i][1], viewProj);
+    //     clipAreas2d[i] = [point2d_1, point2d_2];
+    // }
+
+    // if (!clipClolorOffset)
+    //     clipClolorOffset = colors.length;
+
+    // for (i = 0; i < clipAreas3d.length; i++) {
+    //     addObject(
+    //         [
+    //             vec4( clipAreas3d[i][0][0], clipAreas3d[i][0][1] + boardHeight / 4 + flatset, clipAreas3d[i][0][2], clipAreas3d[i][0][3] ),
+    //             vec4( clipAreas3d[i][0][0], clipAreas3d[i][0][1] + boardHeight / 4 + flatset, clipAreas3d[i][1][2], clipAreas3d[i][0][3] ),
+    //             vec4( clipAreas3d[i][1][0], clipAreas3d[i][1][1] + boardHeight / 4 + flatset, clipAreas3d[i][1][2], clipAreas3d[i][1][3] ),
+    //             vec4( clipAreas3d[i][1][0], clipAreas3d[i][1][1] + boardHeight / 4 + flatset, clipAreas3d[i][0][2], clipAreas3d[i][1][3] )
+    //         ],
+    //         [
+    //             [0, 1, 2, 3]
+    //         ],
+    //         [ 9 ]
+    //     )
+    // }
+
+
+
+}
+
+function getCanvasPosition(point3d, viewProj) {
+    // transform world to clipping coordinates
+    var point3d_t = new vec4();
+    for (var i = 0; i < 4; i++) {
+        for (var j = 0; j < 4; j++)
+            point3d_t[i] += point3d[j] * viewProj[j][i];
+    }
+
+    for (i = 0; i < 4; i++)
+        point3d_t[i] = point3d_t[i] / point3d_t[3];
+
+    var point2d = vec2( point3d_t[0],
+                        1 - point3d_t[2] );
+    return point2d;
 }
 
 function initBoard() {
@@ -371,7 +500,7 @@ function spinboard() {
 
 function rotateRemaining(degreesRemaining) {
     if (degreesRemaining == 0) {
-        return;
+        return updateClickAreas();
     } else if (degreesRemaining > 0) {
         theta[1] += 1;
         setTimeout(function() {return rotateRemaining(degreesRemaining - 1)}, 3);
@@ -441,4 +570,9 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
     colorIndices = colorIndices.concat([4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]);
 
     this.updatePoints(0, 0);
+}
+
+function getCanvasPoint(mouseevent) {
+    return vec2(2 * (event.clientX - canvas.offsetLeft) / canvas.width - 1,
+        2 * (canvas.height - event.clientY + canvas.offsetTop) / canvas.height - 1);
 }
