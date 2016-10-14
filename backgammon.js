@@ -137,7 +137,6 @@ function addObject(newVertices, newIndices, newColorIndices) {
     }));
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    console.log(vertexOffset);
     gl.bufferSubData(gl.ARRAY_BUFFER, 16 * vertexOffset, flatten(newVertices));
 
     colorIndices = colorIndices.concat(newColorIndices);
