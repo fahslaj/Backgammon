@@ -23,7 +23,7 @@ var indices = [];
 // colorIndices defines the color index for each polygon
 var colorIndices = [];
 var maxNumVertices = 100000;
-var worldIndicesOffset;
+var worldIndexOffset;
 
 var theta = [];
 
@@ -113,7 +113,7 @@ window.onload = function init() {
     gl.enableVertexAttribArray(vPosition);
 
     initBoard();
-    worldIndicesOffset = indices.length;
+    worldIndexOffset = vertices.length;
     initPieces();
 
     iBuffer = gl.createBuffer();
@@ -183,14 +183,6 @@ function render() {
     gl.uniformMatrix4fv(modelViewLoc, false, flatten(modelView));
     gl.uniformMatrix4fv(projectionLoc, false, flatten(projection));
 
-    drawWorld();
-
-    // TODO: draw points
-
-    requestAnimFrame(render);
-}
-
-function drawWorld() {
     var index = 0;
     while (colorIndices.length < indices.length) {
         console.log("not all polygons have colors! setting them to something");
@@ -202,12 +194,8 @@ function drawWorld() {
         gl.drawElements(gl.TRIANGLE_FAN, indices[i].length, gl.UNSIGNED_BYTE, index);
         index += indices[i].length;
     }
-}
 
-function updatePlayable() {
-    GameState.board.triangles.forEach(function (element, index, array) {
-
-    })
+    requestAnimFrame(render);
 }
 
 function initBoard() {
