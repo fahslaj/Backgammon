@@ -76,10 +76,10 @@ window.onload = function init() {
         rgb(210, 170, 116),
         rgb(91, 81, 80), // charcoal
         rgb(68, 61, 60), // charcoal
-        rgb(168, 77, 70),
-        rgb(26, 27, 28),
-        rgb(179, 0, 0),
-        rgb(255, 255, 204)
+        rgb(50, 50, 152), // dark blue
+        rgb(25, 25, 75), // blue-black
+        rgb(179, 0, 0), // dark red
+        rgb(255, 255, 204) // off-white
     );
 
     // world rotation
@@ -295,23 +295,22 @@ function initBoard() {
 
     // upper left quadrant
     points = [];
-    for (var i = 0; i < 6; i++) {
+    for (var i = 6; i >= 1; i--) {
     	var refPoint = vec4(-playableLength + i * triangleWidth, 
     						boardOffset + flatset, 
     						-playableWidth, 
     						1);
     	triangleRef.push([refPoint, 1]);
     	points.push(refPoint,
-    				vec4(-playableLength + (i + 1) * triangleWidth - triangleWidth / 2,
+    				vec4(-playableLength + (i - 1) * triangleWidth + triangleWidth / 2,
     						boardOffset + flatset,
     						-playableWidth + 5 * triangleWidth, 
     						1),
-    				vec4(-playableLength + (i + 1) * triangleWidth,
+    				vec4(-playableLength + (i - 1) * triangleWidth,
     						boardOffset + flatset,
     						-playableWidth, 
     						1));
     }
-    colors.reverse();
     addObject(points, mapping, colors);
 
     // lower left quadrant
@@ -388,9 +387,10 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
 	this.bufferOffset = bufferOffset;
 	this.triangle = initialTriangle;
 	this.trianglePos = trianglePos;
-
-	this.center = [ triangleRef[this.triangle][0] + triangleWidth / 2,
-		            triangleRef[this.triangle][1] + triangleWidth / 2 + triangleWidth * this.trianglePos ];
+	this.directionModifier = triangleRef[this.triangle][1];
+	this.center = [ triangleRef[this.triangle][0][0] + triangleWidth / 2 * this.directionModifier,
+		            triangleRef[this.triangle][0][2] + triangleWidth / 2 * this.directionModifier + 
+		            	triangleWidth * this.trianglePos * this.directionModifier];
 	this.numRimPoints = pieceNumPoints / 2;
 
 	this.updatePoints = function(dx, dy) {
@@ -403,8 +403,9 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
 	    var currAngle = 0;
 	    for (var i = 0; i < this.numRimPoints; i++) {
 	        points.push(vec4(   pieceRadius * Math.cos(currAngle) + this.center[0],
-                                boardOffset / 2,
-	                            pieceRadius * Math.sin(currAngle) + this.center[1]));
+                                boardOffset + boardHeight / 4,
+	                            pieceRadius * Math.sin(currAngle) + this.center[1],
+	                            1));
 	        currAngle += theta;
     	}
 
@@ -412,12 +413,14 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
         for (i = 0; i < this.numRimPoints; i++) {
 	        points.push(vec4(   pieceRadius * Math.cos(currAngle) + this.center[0],
                                 boardOffset,
-	                            pieceRadius * Math.sin(currAngle) + this.center[1]));
+	                            pieceRadius * Math.sin(currAngle) + this.center[1],
+	                            1));
 	        currAngle += theta;
     	}
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
         gl.bufferSubData(gl.ARRAY_BUFFER, 16 * bufferOffset, flatten(points));
+        return points;
 	};
 
    	ind = [];
@@ -432,11 +435,12 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
     for (i = 0; i < this.numRimPoints; i++) {
         ind.push([  i,
             (i + 1) % this.numRimPoints,
-            i + this.numRimPoints,
-            (i + 1) % this.numRimPoints + this.numRimPoints])
+            (i + 1) % this.numRimPoints + this.numRimPoints,
+            i + this.numRimPoints])
     }
 
     indices = concatAndOffset(indices, ind, this.bufferOffset);
+    colorIndices = colorIndices.concat([4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]);
 
     this.updatePoints(0, 0);
 }
