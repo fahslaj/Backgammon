@@ -168,6 +168,7 @@ window.onload = function init() {
     initPieces();
 
     iBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
 
     render();
 };
@@ -284,8 +285,7 @@ function concatAndOffset(a1, a2, offset) {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array([].concat.apply([], indices)), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([].concat.apply([], indices)), gl.STATIC_DRAW);
 
     var c = [];
     var s = [];
@@ -320,15 +320,15 @@ function render() {
     gl.uniformMatrix4fv(modelViewLoc, false, flatten(modelView));
     gl.uniformMatrix4fv(projectionLoc, false, flatten(projection));
 
-    var index = 0;
     while (colorIndices.length < indices.length) {
         console.log("not all polygons have colors! setting them to something");
         colorIndices.push(0)
     }
 
-    for (var i = 0; i < indices.length; i++) {
+    var index = 0;
+    for (i = 0; i < indices.length; i++) {
         gl.uniform4fv(colorLoc, colors[colorIndices[i]]);
-        gl.drawElements(gl.TRIANGLE_FAN, indices[i].length, gl.UNSIGNED_BYTE, index);
+        gl.drawElements(gl.TRIANGLE_FAN, indices[i].length, gl.UNSIGNED_SHORT, index * 2);
         index += indices[i].length;
     }
 
@@ -643,6 +643,7 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
     	}
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+        console.log(bufferOffset, points.length);
         gl.bufferSubData(gl.ARRAY_BUFFER, 16 * bufferOffset, flatten(points));
         return points;
 	};
@@ -652,19 +653,21 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
     for (var i = 0; i < this.numRimPoints; i++) {
         ind[0].push(i);
     }
-   	ind[1] = [];
+    colorIndices.push(4);
+    ind[1] = [];
     for (i = 0; i < this.numRimPoints; i++) {
         ind[1].push(i + this.numRimPoints);
     }
+    colorIndices.push(4);
     for (i = 0; i < this.numRimPoints; i++) {
         ind.push([  i,
             (i + 1) % this.numRimPoints,
             (i + 1) % this.numRimPoints + this.numRimPoints,
-            i + this.numRimPoints])
+            i + this.numRimPoints]);
+        colorIndices.push(5);
     }
 
     indices = concatAndOffset(indices, ind, this.bufferOffset);
-    colorIndices = colorIndices.concat([4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]);
 
     this.updatePoints(0, 0);
 }
