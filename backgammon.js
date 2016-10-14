@@ -66,6 +66,7 @@ var piecesByTriangle = [];
 
 var pieceOffset;
 var pieceColorOffset;
+var pieceIndexOffset;
 var boardOffset = -boardscale / 2;
 
 var clipAreas2d = [
@@ -120,12 +121,14 @@ window.onload = function init() {
         rgb(210, 170, 116),
         rgb(91, 81, 80), // charcoal
         rgb(68, 61, 60), // charcoal
-        rgb(50, 50, 152), // dark blue
-        rgb(25, 25, 75), // blue-black
+        rgb(140, 40, 40), // darker red
+        rgb(80, 20, 20), // darkerer red
         rgb(179, 0, 0), // dark red
         rgb(255, 255, 204), // off-white
         vec4(0, 0, 0, 25 / 255), // charcoal w/ alpha
-        vec4(0, 0, 0, 0) // clear
+        vec4(0, 0, 0, 0), // clear
+        rgb(230, 230, 192), // off-er white
+        rgb(170, 170, 132) // off-er-er white
     );
 
     // world rotation
@@ -165,7 +168,8 @@ window.onload = function init() {
 
     initBoard();
     worldIndexOffset = vertices.length;
-    worldColorOffset = colors.length;
+    worldColorOffset = colorIndices.length;
+    pieceIndexOffset = indices.length;
     updatePieces();
 
     iBuffer = gl.createBuffer();
@@ -573,15 +577,18 @@ function initBoard() {
 function updatePieces() {
 	pieceOffset = worldIndexOffset;
 	pieceColorOffset = worldColorOffset;
+	var pIndexOffset = pieceIndexOffset;
 	for (var i = 0; i < 24; i++) {
 		piecesByTriangle[i] = [];
 	}
 	
 	for (var i = 0; i < 24; i++) {
 		for (var j = 0; j < GameState.board.triangles[i].length; j++) {
-			piecesByTriangle[i].push(new Piece(i, j, pieceOffset, pieceColorOffset, 4));
-			pieceOffset += 20;
-			pieceColorOffset += 12;
+			var col = GameState.board.triangles[i][j] == 0 ? 4 : 10;
+			piecesByTriangle[i].push(new Piece(i, j, pIndexOffset, pieceOffset, pieceColorOffset, col));
+			pieceOffset += pieceNumPoints;
+			pieceColorOffset += pieceNumPoints / 2 + 2;
+			pIndexOffset += pieceNumPoints / 2 + 2;
 		}
 	}
 }
@@ -607,8 +614,9 @@ function rotateRemaining(degreesRemaining) {
     }
 }
 
-function Piece(initialTriangle, trianglePos, bufferOffset, colorOffset, colorSchemeOffset) {
+function Piece(initialTriangle, trianglePos, indexOffset, bufferOffset, colorOffset, colorSchemeOffset) {
 	this.bufferOffset = bufferOffset;
+	this.colorOffset = colorOffset;
 	this.triangle = initialTriangle;
 	this.trianglePos = trianglePos;
 	this.directionModifier = triangleRef[this.triangle][1];
@@ -652,20 +660,26 @@ function Piece(initialTriangle, trianglePos, bufferOffset, colorOffset, colorSch
     for (var i = 0; i < this.numRimPoints; i++) {
         ind[0].push(i);
     }
-    colorIndices.push(colorSchemeOffset);
+    colorIndices[this.colorOffset++] = colorSchemeOffset;
     ind[1] = [];
     for (i = 0; i < this.numRimPoints; i++) {
         ind[1].push(i + this.numRimPoints);
     }
-    colorIndices.push(colorSchemeOffset);
+    colorIndices[this.colorOffset++] = colorSchemeOffset;
     for (i = 0; i < this.numRimPoints; i++) {
         ind.push([  i,
             (i + 1) % this.numRimPoints,
             (i + 1) % this.numRimPoints + this.numRimPoints,
             i + this.numRimPoints]);
-        colorIndices.push(colorSchemeOffset+1);
+        colorIndices[this.colorOffset++] = colorSchemeOffset + 1;
     }
 
+    // for (i = 0; i < ind.length; i++) {
+    // 	var thing = ind[i].map(function(elem) { 
+    // 		return elem + indexOffset;
+    // 	});
+    // 	indices[indexOffset + i] = thing;
+    // }
     indices = concatAndOffset(indices, ind, this.bufferOffset);
 
     this.updatePoints(0, 0);
