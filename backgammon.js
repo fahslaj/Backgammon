@@ -65,6 +65,7 @@ var pieces = []; // TODO: remove for triangle piece reference below
 var piecesByTriangle = [];
 
 var pieceOffset;
+var pieceColorOffset;
 var boardOffset = -boardscale / 2;
 
 var clipAreas2d = [
@@ -105,7 +106,6 @@ var modelView;
 var projection;
 
 var selectedLocation = -1;
-var moves = [];
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -165,6 +165,7 @@ window.onload = function init() {
 
     initBoard();
     worldIndexOffset = vertices.length;
+    worldColorOffset = colors.length;
     updatePieces();
 
     iBuffer = gl.createBuffer();
@@ -571,13 +572,17 @@ function initBoard() {
 
 function updatePieces() {
 	pieceOffset = worldIndexOffset;
+	pieceColorOffset = worldColorOffset;
 	for (var i = 0; i < 24; i++) {
 		piecesByTriangle[i] = [];
 	}
 	
-	for (var i = 0; i < 5; i++) {
-		piecesByTriangle[0].push(new Piece(0, i, pieceOffset));
-		pieceOffset += 20;
+	for (var i = 0; i < 24; i++) {
+		for (var j = 0; j < GameState.board.triangles[i].length; j++) {
+			piecesByTriangle[i].push(new Piece(i, j, pieceOffset, pieceColorOffset, 4));
+			pieceOffset += 20;
+			pieceColorOffset += 12;
+		}
 	}
 }
 
@@ -602,7 +607,7 @@ function rotateRemaining(degreesRemaining) {
     }
 }
 
-function Piece(initialTriangle, trianglePos, bufferOffset) {
+function Piece(initialTriangle, trianglePos, bufferOffset, colorOffset, colorSchemeOffset) {
 	this.bufferOffset = bufferOffset;
 	this.triangle = initialTriangle;
 	this.trianglePos = trianglePos;
@@ -647,18 +652,18 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
     for (var i = 0; i < this.numRimPoints; i++) {
         ind[0].push(i);
     }
-    colorIndices.push(4);
+    colorIndices.push(colorSchemeOffset);
     ind[1] = [];
     for (i = 0; i < this.numRimPoints; i++) {
         ind[1].push(i + this.numRimPoints);
     }
-    colorIndices.push(4);
+    colorIndices.push(colorSchemeOffset);
     for (i = 0; i < this.numRimPoints; i++) {
         ind.push([  i,
             (i + 1) % this.numRimPoints,
             (i + 1) % this.numRimPoints + this.numRimPoints,
             i + this.numRimPoints]);
-        colorIndices.push(5);
+        colorIndices.push(colorSchemeOffset+1);
     }
 
     indices = concatAndOffset(indices, ind, this.bufferOffset);
