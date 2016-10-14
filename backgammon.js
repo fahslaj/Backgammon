@@ -315,7 +315,6 @@ function initBoard() {
 
     // lower left quadrant
     points = [];
-    colors = colors.reverse();
     for (var i = 0; i < 6; i++) {
     	var refPoint = vec4(-playableLength + i * triangleWidth, 
     						boardOffset + flatset, 
@@ -332,28 +331,26 @@ function initBoard() {
     						playableWidth, 
     						1));
     }
-    colors.reverse();
     addObject(points, mapping, colors);
 
     // lower right quadrant
     points = [];
-    for (var i = 0; i < 6; i++) {
+    for (var i = 6; i >= 1; i--) {
     	var refPoint = vec4(playableLength - i * triangleWidth, 
     						boardOffset + flatset, 
     						playableWidth,
     						1);
     	triangleRef.push([refPoint, -1]);
     	points.push(refPoint,
-    				vec4(playableLength - (i + 1) * triangleWidth + triangleWidth / 2,
+    				vec4(playableLength - (i - 1) * triangleWidth - triangleWidth / 2,
     						boardOffset + flatset,
     						playableWidth - 5 * triangleWidth,
     						1),
-    				vec4(playableLength - (i + 1) * triangleWidth,
+    				vec4(playableLength - (i - 1) * triangleWidth,
     						boardOffset + flatset,
     						playableWidth,
     						1));
     }
-    colors.reverse();
     addObject(points, mapping, colors);
 }
 
@@ -389,7 +386,7 @@ function Piece(initialTriangle, trianglePos, bufferOffset) {
 	this.triangle = initialTriangle;
 	this.trianglePos = trianglePos;
 	this.directionModifier = triangleRef[this.triangle][1];
-	this.center = [ triangleRef[this.triangle][0][0] + triangleWidth / 2 * this.directionModifier,
+	this.center = [ triangleRef[this.triangle][0][0] + triangleWidth / 2 * -this.directionModifier,
 		            triangleRef[this.triangle][0][2] + triangleWidth / 2 * this.directionModifier + 
 		            	triangleWidth * this.trianglePos * this.directionModifier];
 	this.numRimPoints = pieceNumPoints / 2;
