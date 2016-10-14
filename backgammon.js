@@ -130,16 +130,19 @@ window.onload = function init() {
 function addObject(newVertices, newIndices, newColorIndices) {
     var vertexOffset = vertices.length;
     vertices = vertices.concat(newVertices);
-    indices = indices.concat(newIndices.map(function(indexList) {
-        return indexList.map(function(elem) {
-            return elem + vertexOffset;
-        });
-    }));
-
+    indices = concatAndOffset(indices, newIndices, vertexOffset);
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.bufferSubData(gl.ARRAY_BUFFER, 16 * vertexOffset, flatten(newVertices));
 
     colorIndices = colorIndices.concat(newColorIndices);
+}
+
+function concatAndOffset(a1, a2, offset) {
+    return a1.concat(a2.map(function(i) {
+        return i.map(function(elem) {
+            return elem + offset;
+        });
+    }));
 }
 
 function render() {
