@@ -61,6 +61,8 @@ var pieceRadius = triangleWidth / 2;
 var pieceNumPoints = 20;
 var triangleRef =   [];
 
+var pieces = [];
+var pieceOffset;
 var boardOffset = -boardscale / 2;
 
 window.onload = function init() {
@@ -355,7 +357,11 @@ function initBoard() {
 }
 
 function initPieces() {
-	// var piece = new Piece(0, triangleRef[0], worldIndicesOffset);
+	pieceOffset = worldIndexOffset;
+	for (var i = 0; i < 5; i++) {
+		pieces.push(new Piece(0, i, pieceOffset));
+		pieceOffset += 20;
+	}
 }
 
 function rgb(r, g, b) {
@@ -366,8 +372,6 @@ function spinboard() {
     var degreesRemaining = GameState.turn ? -180 : 180;
     rotateRemaining(degreesRemaining);
 }
-
-// var degreesRemaining = 0;
 
 function rotateRemaining(degreesRemaining) {
     if (degreesRemaining == 0) {
