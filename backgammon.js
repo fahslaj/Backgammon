@@ -101,17 +101,18 @@ var clipAreas2d = [
     [vec2(0.6875, -0.32), vec2(0.6425, -0.8275)],
 
     // BAR
-    [vec2(0.06, 0.2675), vec2(-0.08, -0.835)]
+    [vec2(0.06, 0.2675), vec2(-0.08, -0.835)],
 
-    // SIDEBAR
-
+    // SIDEBARS
+    [vec2(.66, -.1875), vec2(.7776, .3125)],
+    [vec2(-.845, -.2125), vec2(-.6275, .3325)]
 ];
 // var clipAreas3d = [];
 
 var modelView;
 var projection;
 
-var selectedLocation = -1;
+var selectedLocation = -2;
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -143,6 +144,7 @@ window.onload = function init() {
     // theta[0] += 50; theta[1] += 50; theta[2] += 50;
 
     canvas.addEventListener("mousedown", function (event) {
+    	// console.log(getCanvasPoint(event));
     	handleMouseDown(event);
     });
 
@@ -199,7 +201,10 @@ function handleMouseDown(event) {
     if (clickedOn == -1) {
     	return;
     }
-    if (selectedLocation == -1) {
+    if (clickedOn > 24) {
+    	clickedOn = -1; // logic uses -1 as position of out of the board
+    }
+    if (selectedLocation == -2) {
     	if (isGameInitialized()) {
         	selectedLocation = clickedOn;
         	log("Selecting: " + selectedLocation);
@@ -210,10 +215,10 @@ function handleMouseDown(event) {
     	if (isValidMove(selectedLocation, clickedOn)) {
     		makeMove(selectedLocation, clickedOn);
     		log("Made move: " + selectedLocation + " " + clickedOn);
-    		selectedLocation = -1;
+    		selectedLocation = -2;
     		updatePieces()
     	} else {
-    		selectedLocation = -1;
+    		selectedLocation = -2;
     		log("Reset selection");
     	}
     	resetStartTriangles();
