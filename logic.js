@@ -79,7 +79,7 @@ function isGameInitialized() {
 function getValidMoves() {
 	var moves = [];
 	for (var startTriangle = 0; startTriangle < 25; startTriangle++) {
-		for (var endTriangle = 0; endTriangle < 25; endTriangle++) {
+		for (var endTriangle = -1; endTriangle < 24; endTriangle++) {
 			if (isValidMove(startTriangle, endTriangle)) {
 				moves.push([startTriangle, endTriangle]);
 			}
@@ -258,12 +258,15 @@ function makeMove(startTriangle, endTriangle) {
 	} else {
 		pieceToMove = GameState.board.triangles[startTriangle].pop();
 	}
-	if (GameState.board.triangles[endTriangle].indexOf(+!GameState.turn) != -1) {
+	if (endTriangle == -1) {
+		// do nothing, piece is being removed :)
+	} else if (GameState.board.triangles[endTriangle].indexOf(+!GameState.turn) != -1) {
 		// must only be 1 piece in the list, or isValidMove fails
 		hitPiece = GameState.board.triangles[endTriangle].pop();
 		GameState.board.bar.push(hitPiece);
+	} else {
+		GameState.board.triangles[endTriangle].push(pieceToMove);
 	}
-	GameState.board.triangles[endTriangle].push(pieceToMove);
 
 	// update dice
 	if (die == 3) {
