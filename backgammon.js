@@ -188,7 +188,7 @@ function handleMouseDown(event) {
         if ( x[0][0] > point[0] && x[1][0] < point[0] && x[0][1] > point[1] && x[1][1] < point[1] ||
                 x[0][0] < point[0] && x[1][0] > point[0] && x[0][1] < point[1] && x[1][1] > point[1] ) {
        		clickedOn = i;
-       		console.log(clickedOn);
+       		// log(clickedOn);
            	break;
         }
     }
@@ -198,19 +198,19 @@ function handleMouseDown(event) {
     if (selectedLocation == -1) {
     	if (isGameInitialized()) {
         	selectedLocation = clickedOn;
-        	console.log("Selecting: " + selectedLocation);
+        	log("Selecting: " + selectedLocation);
         	resetStartTrianglesExceptSelection();
         	highlightEndTrianglesForSelection();
     	}
     } else {
     	if (isValidMove(selectedLocation, clickedOn)) {
     		makeMove(selectedLocation, clickedOn);
-    		console.log("Made move: " + selectedLocation + " " + clickedOn);
+    		log("Made move: " + selectedLocation + " " + clickedOn);
     		selectedLocation = -1;
     		updatePieces()
     	} else {
     		selectedLocation = -1;
-    		console.log("Reset selection");
+    		log("Reset selection");
     	}
     	resetStartTriangles();
     	resetEndTriangles();
@@ -220,19 +220,19 @@ function handleMouseDown(event) {
 function uiEndTurn() {
 	try {
 		endTurn();
-		console.log("Starting turn for player: "+GameState.turn);
+		log("Starting turn for player: "+GameState.turn);
 		spinboard();
 	} catch (e) {
-		console.log("Couldn't end turn: Do you have moves left? "+e);
+		log("Couldn't end turn: Do you have moves left? "+e);
 	}
 }
 
 function rollDiceAndSetMoves() {
 	if (!firstPlayerPicked) {
 		rollForFirstTurn();
-		console.log("Rolled for first turn: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
+		log("Rolled for first turn: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
 		if (firstPlayerPicked) {
-			console.log("Player "+GameState.turn+" goes first.");
+			log("Player "+GameState.turn+" goes first.");
 		}
 		if (firstPlayerPicked) {
 			if (GameState.turn == 1) {
@@ -242,9 +242,9 @@ function rollDiceAndSetMoves() {
 	} else if (!rollDone) {
 		rollDice();
 		highlightStartTriangles();
-		console.log("Rolled dice: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
+		log("Rolled dice: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
 	} else {
-		console.log("Dice already rolled this turn.");
+		log("Dice already rolled this turn.");
 	}
 }
 
@@ -275,7 +275,7 @@ function resetHighlight() {
 }
 
 function highlightStartTriangles() {
-	// console.log("Highlighting start triangles");
+	// log("Highlighting start triangles");
     colorBackup();
 
     // pull from getValidMoves
@@ -291,14 +291,14 @@ function resetStartTriangles() {
 }
 
 function resetStartTrianglesExceptSelection() {
-	// console.log("Resetting start triangles");
+	// log("Resetting start triangles");
     resetHighlight();
     // selectedLocation
     highlight(selectedLocation);
 }
 
 function highlightEndTrianglesForSelection() {
-	// console.log("Highlighting end triangles for "+index);
+	// log("Highlighting end triangles for "+index);
     colorBackup();
 
     var movesAr = getValidMoves();
@@ -309,7 +309,7 @@ function highlightEndTrianglesForSelection() {
 }
 
 function resetEndTriangles() {
-	// console.log("Resetting end triangles");
+	// log("Resetting end triangles");
     resetHighlight();
     highlightStartTriangles();
 }
@@ -376,7 +376,7 @@ function render() {
     gl.uniformMatrix4fv(projectionLoc, false, flatten(projection));
 
     while (colorIndices.length < indices.length) {
-        console.log("not all polygons have colors! setting them to something");
+        log("not all polygons have colors! setting them to something");
         colorIndices.push(0)
     }
 

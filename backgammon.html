@@ -25,6 +25,13 @@ main()
 }
 </script>
 
+<script id="loggy" type="text/javascript">
+    function log(text) {
+        var loggy = document.getElementById("log");
+        loggy.value = text + "\n" + loggy.value;
+    }
+</script>
+
 <script type="text/javascript" src="./Common/webgl-utils.js"></script>
 <script type="text/javascript" src="./Common/initShaders.js"></script>
 <script type="text/javascript" src="./Common/MV.js"></script>
@@ -35,6 +42,7 @@ main()
 	<canvas id="gl-canvas" width="800" height="800">
 	Oops ... your browser doesn't support the HTML5 canvas element
 	</canvas>
+    <textarea id="log" style="height: 500px;" title="message log" readonly></textarea>
 </div>
 <button type="button" onclick="rollDiceAndSetMoves()">Roll Dice</button>
 <button type="button" onclick="uiEndTurn()">End Turn</button>
