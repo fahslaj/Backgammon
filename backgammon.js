@@ -65,6 +65,7 @@ var pieceColorOffset;
 var pieceIndexOffset;
 var boardOffset = -boardscale / 2;
 var worldColorOffset;
+var walltop = boardOffset + boardHeight / 2;
 
 var triangleColorIndexOffset;
 var barColorIndexOffset;
@@ -463,7 +464,6 @@ function updateClickAreas() {
 
 function initBoard() {
     // board
-    var walltop = boardOffset + boardHeight / 2;
     addObject(
         [
             // base
@@ -619,25 +619,35 @@ function initBoard() {
     						1));
     }
     addObject(points, mapping, colors);
+
+    triangleRef[24] = [vec4(0 - triangleWidth / 2, walltop, 0 - triangleWidth, 1), -1];
 }
 
 function updatePieces() {
 	pieceOffset = worldIndexOffset;
 	pieceColorOffset = worldColorOffset;
 	var pIndexOffset = pieceIndexOffset;
-	for (var i = 0; i < 24; i++) {
+	for (var i = 0; i < 25; i++) {
 		piecesByTriangle[i] = [];
 	}
-	
+
+    var col;
 	for (i = 0; i < 24; i++) {
 		for (var j = 0; j < GameState.board.triangles[i].length; j++) {
-			var col = GameState.board.triangles[i][j] == 0 ? 4 : 10;
+			col = GameState.board.triangles[i][j] == 0 ? 4 : 10;
 			piecesByTriangle[i].push(new Piece(i, j, pIndexOffset, pieceOffset, pieceColorOffset, col));
 			pieceOffset += pieceNumPoints;
 			pieceColorOffset += pieceNumPoints / 2 + 2;
 			pIndexOffset += pieceNumPoints / 2 + 2;
 		}
 	}
+	for (i = 0; i < GameState.board.bar.length; i++) {
+        col = GameState.board.bar[i] == 0 ? 4 : 10;
+        piecesByTriangle[24].push(new Piece(24, i, pIndexOffset, pieceOffset, pieceColorOffset, col));
+        pieceOffset += pieceNumPoints;
+        pieceColorOffset += pieceNumPoints / 2 + 2;
+        pIndexOffset += pieceNumPoints / 2 + 2;
+    }
 }
 
 function rgb(r, g, b) {
@@ -681,7 +691,7 @@ function Piece(initialTriangle, trianglePos, indexOffset, bufferOffset, colorOff
 	    var currAngle = 0;
 	    for (var i = 0; i < this.numRimPoints; i++) {
 	        points.push(vec4(   pieceRadius * Math.cos(currAngle) + this.center[0],
-                                boardOffset + boardHeight / 4,
+                                this.triangle == 24 ? walltop + boardHeight / 4 : boardOffset + boardHeight / 4,
 	                            pieceRadius * Math.sin(currAngle) + this.center[1],
 	                            1));
 	        currAngle += theta;
@@ -690,7 +700,7 @@ function Piece(initialTriangle, trianglePos, indexOffset, bufferOffset, colorOff
     	currAngle = 0;
         for (i = 0; i < this.numRimPoints; i++) {
 	        points.push(vec4(   pieceRadius * Math.cos(currAngle) + this.center[0],
-                                boardOffset,
+                                this.triangle == 24 ? walltop : boardOffset,
 	                            pieceRadius * Math.sin(currAngle) + this.center[1],
 	                            1));
 	        currAngle += theta;
