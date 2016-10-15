@@ -93,7 +93,6 @@ function getValidMoves() {
  * Returns 1 if is a valid move using die #1.
  * Returns 2 if is a valid move using die #2.
  * Returns 3 if is a valid move using both dice.
- * TODO: implement bearing off
  */
 function isValidMove(startTriangle, endTriangle) {
 	if (!isGameInitialized()) {
@@ -106,10 +105,13 @@ function isValidMove(startTriangle, endTriangle) {
 		}
 		return isValidBarMove(endTriangle);
 	}
+	var player = GameState.turn;
+	if (canBearOff()) {
+		// TODO: fix
+	}
 	if (!(startTriangle >= 0 && startTriangle < 24 && endTriangle >= 0 && endTriangle < 24)) {
 		return false;
 	}
-	var player = GameState.turn;
 	var isHit = false;
 	if (GameState.board.triangles[startTriangle].length >= 1 &&
 		GameState.board.triangles[startTriangle].indexOf(player) != -1 &&
@@ -174,7 +176,7 @@ function isValidBarMove(endTriangle) {
 	var triangle1;
 	var triangle2;
 	var triangle3;
-	if (GameState.turn) {
+	if (!GameState.turn) {
 		triangle1 = 24 - die1;
 		triangle2 = 24 - die2;
 		triangle3 = 24 - die1 - die2;
@@ -183,13 +185,13 @@ function isValidBarMove(endTriangle) {
 		triangle2 = die2 - 1;
 		triangle3 = die1 + die2 - 1;
 	}
-	if (endTriangle == triangle1 && (GameState.board.triangles[triangle1].indexOf(GameState.turn) != -1 
+	if (endTriangle == triangle1 && (GameState.board.triangles[triangle1].indexOf(+!GameState.turn) == -1 
 										|| GameState.board.triangles[triangle1].length == 1)) {
 		return 1;
-	} else if (endTriangle == triangle2 && (GameState.board.triangles[triangle2].indexOf(GameState.turn) != -1 
+	} else if (endTriangle == triangle2 && (GameState.board.triangles[triangle2].indexOf(+!GameState.turn) == -1 
 										|| GameState.board.triangles[triangle2].length == 1)) {
 		return 2;
-	} else if (endTriangle == triangle3 && (GameState.board.triangles[triangle3].indexOf(GameState.turn) != -1 
+	} else if (endTriangle == triangle3 && (GameState.board.triangles[triangle3].indexOf(+!GameState.turn) == -1 
 										|| GameState.board.triangles[triangle3].length == 1)) {
 		return 3;
 	}
@@ -224,7 +226,7 @@ function makeMove(startTriangle, endTriangle) {
 	// move the piece
 	var pieceToMove = -1;
 	var hitPiece = -1;
-	if (startTriangle == -1) {
+	if (startTriangle == 24) {
 		for (var i = 0; i < GameState.board.bar.length; i++) {
 			if (GameState.board.bar[i] == GameState.turn) {
 				pieceToMove = GameState.board.bar.splice(i, 1)[0];
@@ -265,6 +267,30 @@ function endTurn() {
 		rollDone = false;
 		GameState.turn = +!GameState.turn;
 	}
+}
+
+/**
+ * Check to see if the current player can move to
+ * remove pieces from the board.
+ */
+function canBearOff() {
+	if (GameState.turn) {
+		for (var i = 6; i < GameState.board.triangles.length; i++) {
+			if (GameState.board.triangles[i].indexOf(GameState.turn) != -1) {
+				return false;
+			}
+		}
+	} else {
+		for (var i = 0; i < GameState.board.triangles.length - 6; i++) {
+			if (GameState.board.triangles[i].indexOf(GameState.turn) != -1) {
+				return false;
+			}
+		}
+	}
+	if (GameState.board.bar.indexOf(GameState.turn) != -1) {
+		return false;
+	}
+	return true;
 }
 
 /**
