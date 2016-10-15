@@ -151,7 +151,7 @@ function isValidBearOffMove(startTriangle) {
 	if (GameState.board.triangles[startTriangle].indexOf(GameState.turn) == -1) {
 		return false;
 	}
-	if (GameState.turn) {
+	if (!GameState.turn) {
 		if (startTriangle - GameState.dice[1][0] < 0) {
 			return 1;
 		}
@@ -162,8 +162,17 @@ function isValidBearOffMove(startTriangle) {
 			return 3;
 		}
 	} else {
-		return false;
+		if (startTriangle + GameState.dice[1][0] > 23) {
+			return 1;
+		}
+		if (startTriangle + GameState.dice[2][0] > 23) {
+			return 2;
+		}
+		if (startTriangle + GameState.dice[3][0] > 23) {
+			return 3;
+		}
 	}
+	return false;
 }
 
 /**
@@ -299,7 +308,7 @@ function endTurn() {
  * remove pieces from the board.
  */
 function canBearOff() {
-	if (GameState.turn) {
+	if (!GameState.turn) {
 		for (var i = 6; i < GameState.board.triangles.length; i++) {
 			if (GameState.board.triangles[i].indexOf(GameState.turn) != -1) {
 				return false;
