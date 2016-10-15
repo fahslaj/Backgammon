@@ -269,7 +269,7 @@ function highlight(triangleIndex) {
 
 function resetHighlight() {
     for (var i = 0; i < 24; i++)
-        colorIndices[triangleColorIndexOffset + i] = colorIndexClone[triangleColorIndexOffset + 1];
+        colorIndices[triangleColorIndexOffset + i] = colorIndexClone[triangleColorIndexOffset + i];
 
     colorIndices[barColorIndexOffset] = colorIndexClone[barColorIndexOffset];
 }
