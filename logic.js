@@ -79,7 +79,7 @@ function isGameInitialized() {
 function getValidMoves() {
 	var moves = [];
 	for (var startTriangle = 0; startTriangle < 25; startTriangle++) {
-		for (var endTriangle = 0; endTriangle < 25; endTriangle++) {
+		for (var endTriangle = -1; endTriangle < 24; endTriangle++) {
 			if (isValidMove(startTriangle, endTriangle)) {
 				moves.push([startTriangle, endTriangle]);
 			}
@@ -106,8 +106,8 @@ function isValidMove(startTriangle, endTriangle) {
 		return isValidBarMove(endTriangle);
 	}
 	var player = GameState.turn;
-	if (canBearOff()) {
-		// TODO: fix
+	if (canBearOff() && endTriangle == -1) {
+		return isValidBearOffMove(startTriangle, endTriangle)
 	}
 	if (!(startTriangle >= 0 && startTriangle < 24 && endTriangle >= 0 && endTriangle < 24)) {
 		return false;
@@ -142,6 +142,28 @@ function isValidMove(startTriangle, endTriangle) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Check to see if this is a valid bearing off move.
+ */
+function isValidBearOffMove(startTriangle) {
+	if (GameState.board.triangles[startTriangle].indexOf(GameState.turn) == -1) {
+		return false;
+	}
+	if (GameState.turn) {
+		if (startTriangle - GameState.dice[1][0] < 0) {
+			return 1;
+		}
+		if (startTriangle - GameState.dice[2][0] < 0) {
+			return 2;
+		}
+		if (startTriangle - GameState.dice[1][0] - GameState.dice[2][0] < 0) {
+			return 3;
+		}
+	} else {
+		return false;
+	}
 }
 
 /**
@@ -236,12 +258,15 @@ function makeMove(startTriangle, endTriangle) {
 	} else {
 		pieceToMove = GameState.board.triangles[startTriangle].pop();
 	}
-	if (GameState.board.triangles[endTriangle].indexOf(+!GameState.turn) != -1) {
+	if (endTriangle == -1) {
+		// do nothing, piece is being removed :)
+	} else if (GameState.board.triangles[endTriangle].indexOf(+!GameState.turn) != -1) {
 		// must only be 1 piece in the list, or isValidMove fails
 		hitPiece = GameState.board.triangles[endTriangle].pop();
 		GameState.board.bar.push(hitPiece);
+	} else {
+		GameState.board.triangles[endTriangle].push(pieceToMove);
 	}
-	GameState.board.triangles[endTriangle].push(pieceToMove);
 
 	// update dice
 	if (die == 3) {

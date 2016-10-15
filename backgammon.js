@@ -224,7 +224,7 @@ function uiEndTurn() {
 		log("Starting turn for player: "+GameState.turn);
 		spinboard();
 	} catch (e) {
-		log("Couldn't end turn: Do you have moves left? "+e);
+		log("Couldn't end turn: Do you have moves left?");
 	}
 }
 
@@ -233,7 +233,7 @@ function rollDiceAndSetMoves() {
 		rollForFirstTurn();
 		log("Rolled for first turn: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
 		if (firstPlayerPicked) {
-			log("Player "+GameState.turn+" goes first.");
+			log("Player "+(GameState.turn + 1)+" goes first.");
 		}
 		if (firstPlayerPicked) {
 			if (GameState.turn == 1) {
