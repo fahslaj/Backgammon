@@ -114,9 +114,9 @@ function isValidMove(startTriangle, endTriangle) {
 	if (GameState.board.triangles[startTriangle].length >= 1 &&
 		GameState.board.triangles[startTriangle].indexOf(player) != -1 &&
 		GameState.board.triangles[endTriangle].length <= 4) {
-		if (GameState.board.triangles[endTriangle].indexOf(!player) != -1) {
+		if (GameState.board.triangles[endTriangle].indexOf(+!player) != -1) {
 			var numOppPieces = 0;
-			for (var i = 0; i < GameState.board.triangles[endTriangle]; i++) {
+			for (var i = 0; i < GameState.board.triangles[endTriangle].length; i++) {
 				if (GameState.board.triangles[endTriangle][i] == !player) {
 					numOppPieces++;
 				}
