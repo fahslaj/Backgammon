@@ -106,8 +106,8 @@ function isValidMove(startTriangle, endTriangle) {
 		return isValidBarMove(endTriangle);
 	}
 	var player = GameState.turn;
-	if (canBearOff()) {
-		// TODO: fix
+	if (canBearOff() && endTriangle == -1) {
+		return isValidBearOffMove(startTriangle, endTriangle)
 	}
 	if (!(startTriangle >= 0 && startTriangle < 24 && endTriangle >= 0 && endTriangle < 24)) {
 		return false;
@@ -142,6 +142,28 @@ function isValidMove(startTriangle, endTriangle) {
 		}
 	}
 	return false;
+}
+
+/**
+ * Check to see if this is a valid bearing off move.
+ */
+function isValidBearOffMove(startTriangle) {
+	if (GameState.board.triangles[startTriangle].indexOf(GameState.turn) == -1) {
+		return false;
+	}
+	if (GameState.turn) {
+		if (startTriangle - GameState.dice[1][0] < 0) {
+			return 1;
+		}
+		if (startTriangle - GameState.dice[2][0] < 0) {
+			return 2;
+		}
+		if (startTriangle - GameState.dice[1][0] - GameState.dice[2][0] < 0) {
+			return 3;
+		}
+	} else {
+		return false;
+	}
 }
 
 /**
