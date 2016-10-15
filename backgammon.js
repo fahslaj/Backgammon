@@ -1,6 +1,8 @@
 /** @namespace gl.DEPTH_TEST */
 /** @namespace gl.ARRAY_BUFFER */
 /** @namespace gl.STATIC_DRAW */
+/** @namespace gl.FLOAT */
+/** @namespace gl.ELEMENT_ARRAY_BUFFER */
 
 var canvas;
 var gl;
@@ -29,15 +31,10 @@ var theta = [];
 
 var scale = 1;
 
-var zoom = 0;
-
 var flatset = .005;
 var depthMin = 0.1;
 var depthMax = 10 * scale;
 
-var xAxis = 0;
-var yAxis = 1;
-var zAxis = 2;
 var axis = 0;
 
 var aspect;
@@ -61,13 +58,13 @@ var pieceRadius = triangleWidth / 2;
 var pieceNumPoints = 20;
 var triangleRef =   [];
 
-var pieces = []; // TODO: remove for triangle piece reference below
 var piecesByTriangle = [];
 
 var pieceOffset;
 var pieceColorOffset;
 var pieceIndexOffset;
 var boardOffset = -boardscale / 2;
+var worldColorOffset;
 
 var triangleColorIndexOffset;
 var barColorIndexOffset;
@@ -420,8 +417,6 @@ function updateClickAreas() {
     //     clipAreas3d[i].push(point2);
     // }
     //
-    // // TODO: compute special areas
-    //
     //
     // // go through and compute clicks
     // for (i = 0; i < clipAreas3d.length; i++) {
@@ -452,21 +447,19 @@ function updateClickAreas() {
 
 }
 
-function getCanvasPosition(point3d, viewProj) {
-    // transform world to clipping coordinates
-    var point3d_t = new vec4();
-    for (var i = 0; i < 4; i++) {
-        for (var j = 0; j < 4; j++)
-            point3d_t[i] += point3d[j] * viewProj[j][i];
-    }
-
-    for (i = 0; i < 4; i++)
-        point3d_t[i] = point3d_t[i] / point3d_t[3];
-
-    var point2d = vec2( point3d_t[0],
-                        1 - point3d_t[2] );
-    return point2d;
-}
+// function getCanvasPosition(point3d, viewProj) {
+//     // transform world to clipping coordinates
+//     var point3d_t = new vec4();
+//     for (var i = 0; i < 4; i++) {
+//         for (var j = 0; j < 4; j++)
+//             point3d_t[i] += point3d[j] * viewProj[j][i];
+//     }
+//
+//     for (i = 0; i < 4; i++)
+//         point3d_t[i] = point3d_t[i] / point3d_t[3];
+//
+//     return vec2(point3d_t[0], 1 - point3d_t[2]);
+// }
 
 function initBoard() {
     // board
@@ -502,15 +495,15 @@ function initBoard() {
             vec4(-boardLength + boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
 
             // bar
-            vec4(0 + boardwallwidth, walltop, -boardWidth + boardwallwidth, 1), // 20
+            vec4(boardwallwidth, walltop, -boardWidth + boardwallwidth, 1), // 20
             vec4(0 - boardwallwidth, walltop, -boardWidth + boardwallwidth, 1),
-            vec4(0 + boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
+            vec4(boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
             vec4(0 - boardwallwidth, walltop, boardWidth - boardwallwidth, 1),
 
-            vec4(0 + boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1), // 24
+            vec4(boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1), // 24
             vec4(0 - boardwallwidth, boardOffset, -boardWidth + boardwallwidth, 1),
-            vec4(0 + boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
-            vec4(0 - boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
+            vec4(boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1),
+            vec4(0 - boardwallwidth, boardOffset, boardWidth - boardwallwidth, 1)
         ],
         [
             [0, 1, 2, 3],
@@ -548,8 +541,9 @@ function initBoard() {
 
     // upper right quadrant
     var points = [];
-    for (var i = 0; i < 6; i++) {
-    	var refPoint = vec4(playableLength - i * triangleWidth, 
+    var refPoint;
+    for (i = 0; i < 6; i++) {
+    	refPoint = vec4(playableLength - i * triangleWidth,
     						boardOffset + flatset, 
     						-playableWidth,
     						1);
@@ -568,8 +562,8 @@ function initBoard() {
 
     // upper left quadrant
     points = [];
-    for (var i = 6; i >= 1; i--) {
-    	var refPoint = vec4(-playableLength + i * triangleWidth, 
+    for (i = 6; i >= 1; i--) {
+    	refPoint = vec4(-playableLength + i * triangleWidth,
     						boardOffset + flatset, 
     						-playableWidth, 
     						1);
@@ -588,8 +582,8 @@ function initBoard() {
 
     // lower left quadrant
     points = [];
-    for (var i = 0; i < 6; i++) {
-    	var refPoint = vec4(-playableLength + i * triangleWidth, 
+    for (i = 0; i < 6; i++) {
+    	refPoint = vec4(-playableLength + i * triangleWidth,
     						boardOffset + flatset, 
     						playableWidth, 
     						1);
@@ -608,8 +602,8 @@ function initBoard() {
 
     // lower right quadrant
     points = [];
-    for (var i = 6; i >= 1; i--) {
-    	var refPoint = vec4(playableLength - i * triangleWidth, 
+    for (i = 6; i >= 1; i--) {
+    	refPoint = vec4(playableLength - i * triangleWidth,
     						boardOffset + flatset, 
     						playableWidth,
     						1);
@@ -635,7 +629,7 @@ function updatePieces() {
 		piecesByTriangle[i] = [];
 	}
 	
-	for (var i = 0; i < 24; i++) {
+	for (i = 0; i < 24; i++) {
 		for (var j = 0; j < GameState.board.triangles[i].length; j++) {
 			var col = GameState.board.triangles[i][j] == 0 ? 4 : 10;
 			piecesByTriangle[i].push(new Piece(i, j, pIndexOffset, pieceOffset, pieceColorOffset, col));
@@ -668,7 +662,6 @@ function rotateRemaining(degreesRemaining) {
 }
 
 function Piece(initialTriangle, trianglePos, indexOffset, bufferOffset, colorOffset, colorSchemeOffset) {
-	this.bufferOffset = bufferOffset;
 	this.colorOffset = colorOffset;
 	this.triangle = initialTriangle;
 	this.trianglePos = trianglePos;
