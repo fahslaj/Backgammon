@@ -221,6 +221,7 @@ function handleMouseDown(event) {
     		selectedLocation = -2;
     		log("Reset selection");
     	}
+    	resetDiceUsed();
     	resetStartTriangles();
     	resetEndTriangles();
     }
@@ -259,7 +260,8 @@ function rollDiceAndSetMoves() {
 	} else {
 		log("Dice already rolled this turn.");
 	}
-
+	
+	resetDiceUsed();
 	document.getElementById('1').innerHTML = GameState.dice[1][0];
     document.getElementById('2').innerHTML = GameState.dice[2][0];
 }
@@ -328,6 +330,11 @@ function resetEndTriangles() {
 	// log("Resetting end triangles");
     resetHighlight();
     highlightStartTriangles();
+}
+
+function resetDiceUsed() {
+	document.getElementById('1').style.color = GameState.dice[1][1] ? "red" : "black";
+    document.getElementById('2').style.color = GameState.dice[2][1] ? "red" : "black";
 }
 
 /**
