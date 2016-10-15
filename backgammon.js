@@ -101,6 +101,9 @@ var clipAreas2d = [
 
     // BAR
     [vec2(0.06, 0.2675), vec2(-0.08, -0.835)]
+
+    // SIDEBAR
+
 ];
 // var clipAreas3d = [];
 
@@ -217,10 +220,14 @@ function handleMouseDown(event) {
     }
 }
 
+function getPrintTextForPlayer(turn) {
+	return GameState.turn == 0 ? "Red" : "White";
+}
+
 function uiEndTurn() {
 	try {
 		endTurn();
-		log("Starting turn for player: "+GameState.turn);
+		log("Starting turn for player: "+getPrintTextForPlayer(GameState.turn));
 		spinboard();
 	} catch (e) {
 		log("Couldn't end turn: Do you have moves left?");
@@ -232,7 +239,7 @@ function rollDiceAndSetMoves() {
 		rollForFirstTurn();
 		log("Rolled for first turn: "+GameState.dice[1][0]+", "+GameState.dice[2][0]);
 		if (firstPlayerPicked) {
-			log("Player "+(GameState.turn + 1)+" goes first.");
+			log("Player "+getPrintTextForPlayer(GameState.turn)+" goes first.");
 		}
 		if (firstPlayerPicked) {
 			if (GameState.turn == 1) {
