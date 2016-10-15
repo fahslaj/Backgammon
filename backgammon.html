@@ -1,3 +1,9 @@
+<!--
+
+Created by Joel Shapiro and Austin Fahsl
+
+-->
+
 <title>backgammon - shapiro/fahsl</title>
 <link rel="stylesheet" href="backgammon.css">
 
@@ -39,7 +45,7 @@ main()
 <script type="text/javascript" src="backgammon.js"></script>
 
 <div>
-	<canvas id="gl-canvas" width="800" height="800">
+	<canvas id="gl-canvas" width="600" height="600">
 	Oops ... your browser doesn't support the HTML5 canvas element
 	</canvas>
     <textarea id="log" style="height: 500px;" title="message log" readonly></textarea>
@@ -47,3 +53,22 @@ main()
 <div id="1" class="die">-1</div><div id="2" class="die">-1</div>
 <button type="button" onclick="rollDiceAndSetMoves()">Roll Dice</button>
 <button type="button" onclick="uiEndTurn()">End Turn</button>
+<div style="font-family: Georgia, serif; width: 550px;">
+    <h3>Joel Shapiro's and Austin Fahsl's backgammon project</h3>
+    <p>
+        Welcome to the wonderful world of games nobody plays.
+    </p>
+    <p>
+        To play, first you have to roll to see who goes first; do this by pressing the `roll dice` button.
+        Once a tie is broken, the winner's turn will start. <br />
+
+        The board will highlight which points you can start from, and once you select one it will show the
+        available moves that can be taken form that point. Click on the selected spot again will unselect it.
+        The log on the right is useful if something unexpected happened. <br />
+
+        To 'bear-off' pieces, simply click off the board (but near the edge of it) from a position which is able to bear-off. <br />
+    </p>
+    <p>
+        Enjoy!
+    </p>
+</div>

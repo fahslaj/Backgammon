@@ -1,3 +1,9 @@
+/**
+ *
+ * Created by Joel Shapiro and Austin Fahsl
+ *
+ * */
+
 /** @namespace gl.DEPTH_TEST */
 /** @namespace gl.ARRAY_BUFFER */
 /** @namespace gl.STATIC_DRAW */
@@ -71,6 +77,11 @@ var triangleColorIndexOffset;
 var barColorIndexOffset;
 var colorIndexClone;
 
+
+/**
+ * Check below for the commented out code that should have replaced this
+ * I never got it to successfully work, so this is just a hack to have something
+ * */
 var clipAreas2d = [
     [vec2(.6, .2225), vec2(.5125, -0.175)],
     [vec2(0.5125, 0.2225), vec2(0.4225, -0.1825)],

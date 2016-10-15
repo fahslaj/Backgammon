@@ -1,3 +1,9 @@
+/**
+ *
+ * Created by Joel Shapiro and Austin Fahsl
+ *
+ * */
+
 // GameState variable to be watched by the UI
 var GameState = {
 	turn: -1,
