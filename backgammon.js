@@ -259,6 +259,9 @@ function rollDiceAndSetMoves() {
 	} else {
 		log("Dice already rolled this turn.");
 	}
+
+	document.getElementById('1').innerHTML = GameState.dice[1][0];
+    document.getElementById('2').innerHTML = GameState.dice[2][0];
 }
 
 function colorBackup() {
