@@ -69,6 +69,10 @@ var pieceColorOffset;
 var pieceIndexOffset;
 var boardOffset = -boardscale / 2;
 
+var triangleColorIndexOffset;
+var barColorIndexOffset;
+var colorIndexClone;
+
 var clipAreas2d = [
     [vec2(.6, .2225), vec2(.5125, -0.175)],
     [vec2(0.5125, 0.2225), vec2(0.4225, -0.1825)],
@@ -125,7 +129,7 @@ window.onload = function init() {
         rgb(80, 20, 20), // darkerer red
         rgb(179, 0, 0), // dark red
         rgb(255, 255, 204), // off-white
-        vec4(0, 0, 0, 25 / 255), // charcoal w/ alpha
+        rgb(244, 203, 66), // highlight // 8
         vec4(0, 0, 0, 0), // clear
         rgb(230, 230, 192), // off-er white
         rgb(170, 170, 132) // off-er-er white
@@ -247,24 +251,70 @@ function rollDiceAndSetMoves() {
 	}
 }
 
+function colorBackup() {
+    if (!colorIndexClone) {
+        colorIndexClone = [];
+        for (var i = 0; i < colorIndices.length; i++) {
+            colorIndexClone[i] = colorIndices[i];
+        }
+    }
+}
+
+function highlight(triangleIndex) {
+    colorBackup();
+
+    if (triangleIndex === 24) {
+        colorIndices[barColorIndexOffset] = 8;
+    } else if (triangleIndex < 24 && triangleIndex >= 0) {
+        colorIndices[triangleColorIndexOffset + triangleIndex] = 8;
+    }
+}
+
+function resetHighlight() {
+    for (var i = 0; i < 24; i++)
+        colorIndices[triangleColorIndexOffset + i] = colorIndexClone[triangleColorIndexOffset + 1];
+
+    colorIndices[barColorIndexOffset] = colorIndexClone[barColorIndexOffset];
+}
+
 function highlightStartTriangles() {
-	// console.log("Hightlighting start triangles");
+	// console.log("Highlighting start triangles");
+    colorBackup();
+
+    // pull from getValidMoves
+    var movesAr = getValidMoves();
+    for (var i = 0; i < movesAr.length; i++) {
+        highlight(movesAr[i][0]);
+    }
 }
 
 function resetStartTriangles() {
-
+    // erase highlighting
+    resetHighlight();
 }
 
 function resetStartTrianglesExceptSelection() {
 	// console.log("Resetting start triangles");
+    resetHighlight();
+    // selectedLocation
+    highlight(selectedLocation);
 }
 
 function highlightEndTrianglesForSelection() {
 	// console.log("Highlighting end triangles for "+index);
+    colorBackup();
+
+    var movesAr = getValidMoves();
+    for (var i = 0; i < movesAr.length; i++) {
+        if (movesAr[i][0] === selectedLocation)
+            highlight(movesAr[i][1]);
+    }
 }
 
 function resetEndTriangles() {
 	// console.log("Resetting end triangles");
+    resetHighlight();
+    highlightStartTriangles();
 }
 
 /**
@@ -487,6 +537,9 @@ function initBoard() {
         [2, 1, 3, 3, 3, 3, 2, 2, 2, 2, 3, 3, 3, 3, 2, 3]
     );
 
+    barColorIndexOffset = colorIndices.length - 2;
+    triangleColorIndexOffset = colorIndices.length;
+
     var mapping = [];
     for (var i = 0; i < 18; i+=3) {
     	mapping.push([i, i + 1, i + 2]);
@@ -674,18 +727,16 @@ function Piece(initialTriangle, trianglePos, indexOffset, bufferOffset, colorOff
         colorIndices[this.colorOffset++] = colorSchemeOffset + 1;
     }
 
-    // for (i = 0; i < ind.length; i++) {
-    // 	var thing = ind[i].map(function(elem) { 
-    // 		return elem + indexOffset;
-    // 	});
-    // 	indices[indexOffset + i] = thing;
-    // }
-    indices = concatAndOffset(indices, ind, this.bufferOffset);
+    for (i = 0; i < ind.length; i++) {
+        indices[indexOffset + i] = ind[i].map(function (elem) {
+            return elem + bufferOffset;
+        });
+    }
 
     this.updatePoints(0, 0);
 }
 
-function getCanvasPoint(mouseevent) {
+function getCanvasPoint(event) {
     return vec2(2 * (event.clientX - canvas.offsetLeft) / canvas.width - 1,
         2 * (canvas.height - event.clientY + canvas.offsetTop) / canvas.height - 1);
 }
